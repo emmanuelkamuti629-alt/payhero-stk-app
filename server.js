@@ -1,4 +1,4 @@
-// server.js - FINAL VERSION FOR https://payhero-stk-app.onrender.com
+// server.js - FINAL VERSION (MERGES STK & CALLBACK INTO ONE TRANSACTION)
 require('dotenv').config();
 
 const express = require('express');
@@ -44,13 +44,21 @@ console.log('=============================================');
 // ---- Simple store ----
 const transactions = [];
 
-function findTransactionByReference(ref) {
-  if (!ref) return null;
-  return transactions.find((t) => t.reference === ref);
+// Helper to find a transaction by its CheckoutRequestID OR external reference
+function findTransaction(ref, checkoutId) {
+  if (checkoutId) {
+    const byCheckout = transactions.find((t) => t.checkout_request_id === checkoutId);
+    if (byCheckout) return byCheckout;
+  }
+  if (ref) {
+    return transactions.find((t) => t.reference === ref);
+  }
+  return null;
 }
 
-function updateTransaction(ref, updates) {
-  const tx = findTransactionByReference(ref);
+// Helper to update an existing transaction
+function updateTransaction(ref, checkoutId, updates) {
+  const tx = findTransaction(ref, checkoutId);
   if (tx) {
     Object.assign(tx, updates, { updatedAt: new Date().toISOString() });
     return true;
@@ -129,6 +137,7 @@ app.post('/api/stk', async (req, res) => {
       status: isSuccess ? 'pending' : 'failed',
       reason: isSuccess ? null : (data?.message || data?.error || 'Request failed'),
       reference: externalRef,
+      checkout_request_id: data?.CheckoutRequestID || null, // 👈 SAVE THIS FOR MATCHING
       raw: data,
     });
 
@@ -161,26 +170,30 @@ app.post('/api/payhero/callback', (req, res) => {
 
   const details = req.body?.response || req.body;
 
-  const phone = details?.Source || details?.phone || details?.phone_number || details?.MSISDN || null;
+  const phone = details?.Phone || details?.phone || details?.phone_number || details?.MSISDN || null;
   const amount = details?.Amount || details?.amount || null;
   const reference = details?.User_Reference || details?.external_reference || details?.Transaction_Reference || null;
-
-  // Normalize status: "Success" -> "success", "Failed" -> "failed"
-  let rawStatus = details?.Status || details?.status || 'unknown';
-  let status = 'unknown';
+  const checkoutId = details?.CheckoutRequestID || details?.checkout_request_id || null;
   
-  if (String(rawStatus).toLowerCase() === 'true' || String(rawStatus).toLowerCase() === 'success') {
+  // ResultCode 0 = Success, anything else = Failed
+  const resultCode = details?.ResultCode !== undefined ? details.ResultCode : details?.result_code;
+  const resultDesc = details?.ResultDesc || details?.result_desc || 'Transaction failed';
+
+  let status = 'failed';
+  let reason = resultDesc;
+
+  if (resultCode === 0 || resultCode === '0') {
     status = 'success';
-  } else if (String(rawStatus).toLowerCase() === 'false' || String(rawStatus).toLowerCase() === 'failed') {
-    status = 'failed';
+    reason = 'Payment successful';
   } else {
-    status = String(rawStatus).toLowerCase();
+    // Friendly messages for common codes
+    if (resultCode === 1032) reason = 'Request cancelled by user';
+    else if (resultCode === 1037) reason = 'Request timed out';
+    else if (resultCode === 1) reason = 'Insufficient funds';
   }
 
-  const reason = details?.Message || details?.message || null;
-
   // Try to update the original STK transaction
-  const updated = updateTransaction(reference, {
+  const updated = updateTransaction(reference, checkoutId, {
     status: status,
     reason: reason,
     phone: phone || undefined,
@@ -189,6 +202,7 @@ app.post('/api/payhero/callback', (req, res) => {
   });
 
   if (!updated) {
+    // Fallback: if we can't find the original, log it as a standalone entry
     recordTransaction({
       type: 'CALLBACK',
       phone: phone,
@@ -196,6 +210,7 @@ app.post('/api/payhero/callback', (req, res) => {
       status: status,
       reason: reason,
       reference: reference,
+      checkout_request_id: checkoutId,
       raw: req.body,
     });
   }
