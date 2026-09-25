@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,7 +18,34 @@ const PAYHERO_BASE_URL = 'https://backend.payhero.co.ke/api/v2';
 const PAYHERO_ENDPOINT = 'payments';
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// ---- Static files ----
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const INDEX_FILE = path.join(PUBLIC_DIR, 'index.html');
+
+console.log('📂 Public dir:', PUBLIC_DIR);
+console.log('📂 Public dir exists:', fs.existsSync(PUBLIC_DIR));
+console.log('📂 index.html exists:', fs.existsSync(INDEX_FILE));
+
+app.use(express.static(PUBLIC_DIR));
+
+// ---- EXPLICIT ROOT ROUTE ----
+app.get('/', (req, res) => {
+  if (fs.existsSync(INDEX_FILE)) {
+    return res.sendFile(INDEX_FILE);
+  }
+  return res.status(500).send(`
+    <html>
+      <body style="font-family:sans-serif;padding:40px;background:#FDF6E3;color:#1F2937;">
+        <h2 style="color:#DC2626;">❌ public/index.html not found</h2>
+        <p>Render looked for the file at:</p>
+        <pre style="background:#fff;padding:12px;border-radius:8px;border:1px solid #E5E7EB;">${INDEX_FILE}</pre>
+        <p><strong>Fix:</strong> Make sure <code>public/index.html</code> is committed to your GitHub repository at the top level.</p>
+        <p>Check your repo: <a href="https://github.com/emmanuelkamuti629-alt/payhero-stk-app">github.com/emmanuelkamuti629-alt/payhero-stk-app</a></p>
+      </body>
+    </html>
+  `);
+});
 
 // ---- Startup diagnostic ----
 console.log('=============================================');
@@ -50,8 +78,7 @@ async function payheroPost(payload) {
   }
 
   const url = `${PAYHERO_BASE_URL}/${PAYHERO_ENDPOINT}`;
-  
-  // Ensure Basic prefix exists exactly once
+
   const authHeader = PAYHERO_BASIC_AUTH_TOKEN.startsWith('Basic ')
     ? PAYHERO_BASIC_AUTH_TOKEN
     : `Basic ${PAYHERO_BASIC_AUTH_TOKEN}`;
@@ -95,39 +122,36 @@ app.post('/api/stk', async (req, res) => {
   const payload = {
     amount: Number(amount),
     phone_number: msisdn,
-    channel_id: PAYHERO_CHANNEL_ID, // MUST be number, not string: 9226
+    channel_id: PAYHERO_CHANNEL_ID,
     provider: 'm-pesa',
     external_reference: reference || `INV-${Date.now()}`,
-    // OPTIONAL but recommended for production - add your public URL
-    // callback_url: "https://yourdomain.com/api/payhero/callback"
   };
 
   try {
     const { httpStatus, data } = await payheroPost(payload);
 
-    // PayHero returns success: true when STK is sent
     const isSuccess = httpStatus >= 200 && httpStatus < 300 && (data?.success === true || data?.status === true);
 
     recordTransaction({
-      type: 'STK', 
-      phone: msisdn, 
+      type: 'STK',
+      phone: msisdn,
       amount,
       status: isSuccess ? 'sent' : 'failed',
       reason: isSuccess ? null : (data?.message || data?.error || 'Request failed'),
-      reference: payload.external_reference, 
+      reference: payload.external_reference,
       raw: data,
     });
 
     return res.status(httpStatus).json({ status: isSuccess, data: data });
   } catch (err) {
     console.error('❌ REQUEST FAILED:', err.message);
-    recordTransaction({ 
-      type: 'STK', 
-      phone: msisdn, 
-      amount, 
-      status: 'error', 
+    recordTransaction({
+      type: 'STK',
+      phone: msisdn,
+      amount,
+      status: 'error',
       reason: err.message,
-      raw: err.message 
+      raw: err.message
     });
     return res.status(502).json({ status: false, message: err.message });
   }
@@ -142,14 +166,12 @@ app.get('/api/transactions', (_req, res) => {
 app.post('/api/payhero/callback', (req, res) => {
   console.log('📬 Callback:', JSON.stringify(req.body, null, 2));
 
-  // PayHero usually nests the actual transaction details inside a "response" object
   const details = req.body?.response || req.body;
 
   const phone = details?.Source || details?.phone || details?.phone_number || details?.MSISDN || null;
   const amount = details?.Amount || details?.amount || null;
   const reference = details?.User_Reference || details?.external_reference || details?.Transaction_Reference || null;
-  
-  // Extract the real status and reason
+
   const status = details?.Status || details?.status || 'received';
   const reason = details?.Message || details?.message || null;
 
@@ -157,8 +179,8 @@ app.post('/api/payhero/callback', (req, res) => {
     type: 'CALLBACK',
     phone: phone,
     amount: amount,
-    status: status,       // Will be "Success" or "Failed"
-    reason: reason,       // Will be "Insufficient funds", "Request cancelled by user", etc.
+    status: status,
+    reason: reason,
     reference: reference,
     raw: req.body,
   });
