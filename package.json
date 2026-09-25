@@ -1,0 +1,17 @@
+{
+  "name": "payhero-stk-app",
+  "version": "1.0.0",
+  "description": "PayHero M-Pesa STK Push Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
