@@ -229,7 +229,6 @@
   }
   input::placeholder { color: #B0B7C3; font-weight: 400; }
 
-  /* Remove number spinners */
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input[type=number] { -moz-appearance: textfield; }
@@ -475,8 +474,12 @@
   .tx-line-2 .ref { font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; }
   .tx-line-2 .reason {
     color: var(--danger);
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.75rem;
+    background: var(--danger-light);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
   }
 
   .tx-amount {
@@ -737,14 +740,12 @@
     });
   });
 
-  // ======== Phone input: enforce local 9-10 digits ========
+  // ======== Phone input ========
   phoneEl.addEventListener('input', () => {
     phoneEl.value = phoneEl.value.replace(/\D/g, '').slice(0, 10);
-    // strip leading 0 automatically
     if (phoneEl.value.startsWith('0')) phoneEl.value = phoneEl.value.slice(1);
   });
 
-  // ======== Normalize phone to 2547XXXXXXXX ========
   function toMsisdn(raw) {
     let p = String(raw || '').replace(/\D/g, '');
     if (p.startsWith('254')) return p;
@@ -835,7 +836,7 @@
           phone: msisdn,
           amount,
           reference: reference || (json.data?.external_reference) || '—',
-          status: 'Sent',
+          status: 'Pending',
           reason: null,
           createdAt: new Date().toISOString(),
         });
@@ -865,9 +866,9 @@
   function statusBadge(status) {
     const s = String(status || '').toLowerCase().trim();
     let cls = 'info';
-    if (['sent', 'success', 'accepted', 'completed'].includes(s)) cls = 'success';
+    if (['success', 'completed'].includes(s)) cls = 'success';
     else if (['failed', 'error', 'cancelled', 'rejected'].includes(s)) cls = 'failed';
-    else if (['pending', 'processing', 'queued'].includes(s)) cls = 'pending';
+    else if (['pending', 'processing', 'queued', 'sent', 'accepted'].includes(s)) cls = 'pending';
     else if (s === 'received') cls = 'received';
     return `<span class="badge ${cls}">${escapeHtml(status || 'unknown')}</span>`;
   }
@@ -915,8 +916,12 @@
         const phone = tx.phone || '—';
         const amount = tx.amount != null ? tx.amount : '—';
         const ref = tx.reference || '';
-        const reason = tx.reason ? `<span class="reason">⚠ ${escapeHtml(tx.reason)}</span>` : '';
+        // Highlight the reason specifically if the transaction failed
+        const reason = tx.reason 
+          ? `<span class="reason">⚠ ${escapeHtml(tx.reason)}</span>` 
+          : '';
         const time = tx.createdAt ? new Date(tx.createdAt).toLocaleTimeString() : '';
+        
         return `
           <div class="tx-item">
             <div class="tx-avatar ${typeClass(tx.type)}">${escapeHtml(typeLabel(tx.type))}</div>
@@ -946,11 +951,11 @@
 
   refreshBtn.addEventListener('click', () => loadTransactions(false));
 
-  // ======== Auto-refresh every 10s ========
+  // ======== Auto-refresh every 5 seconds ========
   loadTransactions(true);
-  setInterval(() => loadTransactions(true), 10000);
+  setInterval(() => loadTransactions(true), 5000);
 })();
 </script>
 
 </body>
-  </html>
+      </html>
