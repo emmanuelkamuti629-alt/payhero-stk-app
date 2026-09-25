@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PayHero • M-Pesa Dashboard</title>
+<style>
+  :root {
+    --mpesa-green: #00A651;
+    --mpesa-green-dark: #007A3D;
+    --mpesa-green-light: #E6F7EE;
+    --cream: #FDF6E3;
+    --cream-dark: #F5EEDC;
+    --card: #FFFFFF;
+    --text: #1F2937;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --danger: #DC2626;
+    --danger-light: #FEE2E2;
+    --warning: #D97706;
+    --warning-light: #FEF3C7;
+    --info: #2563EB;
+    --info-light: #DBEAFE;
+    --success: #059669;
+    --success-light: #D1FAE5;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 40px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========== HEADER ========== */
+  header {
+    background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-green-dark) 100%);
+    color: #fff;
+    padding: 24px 20px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: "";
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 220px; height: 220px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  header::after {
+    content: "";
+    position: absolute;
+    bottom: -100px; left: -40px;
+    width: 180px; height: 180px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--mpesa-green);
+    letter-spacing: -1px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .brand-text h1 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .brand-text p {
+    font-size: 0.78rem;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+  }
+  .dot-live {
+    width: 7px; height: 7px;
+    background: #4ADE80;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(74,222,128,0.7);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.7); }
+    70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+  }
+
+  /* ========== LAYOUT ========== */
+  .container {
+    max-width: 960px;
+    margin: -36px auto 0;
+    padding: 0 16px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 760px) {
+    .grid-split { grid-template-columns: 1.1fr 1fr; }
+  }
+
+  /* ========== CARDS ========== */
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(0,0,0,0.04);
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 20px 22px 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--mpesa-green-light);
+    display: grid;
+    place-items: center;
+    color: var(--mpesa-green-dark);
+    flex-shrink: 0;
+  }
+  .card-icon svg { width: 20px; height: 20px; }
+  .card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+  .card-subtitle {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .card-body { padding: 8px 22px 22px; }
+
+  /* ========== FORM ========== */
+  .field { margin-top: 16px; }
+  .field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-prefix {
+    position: absolute;
+    left: 14px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+  .input-wrap input.has-prefix { padding-left: 52px; }
+  input[type="text"],
+  input[type="number"],
+  input[type="tel"] {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--cream);
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  input:focus {
+    border-color: var(--mpesa-green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0,166,81,0.12);
+  }
+  input::placeholder { color: #B0B7C3; font-weight: 400; }
+
+  /* Remove number spinners */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+
+  .quick-amounts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .chip {
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .chip:hover, .chip:active {
+    background: var(--mpesa-green-light);
+    border-color: var(--mpesa-green);
+    color: var(--mpesa-green-dark);
+  }
+
+  .btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    letter-spacing: 0.2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-green-dark) 100%);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(0,166,81,0.35);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0,166,81,0.45);
+  }
+  .btn-primary:active:not(:disabled) { transform: translateY(0); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .btn.loading .spinner { display: inline-block; }
+  .btn.loading .btn-label { opacity: 0.85; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ========== RESPONSE BOX ========== */
+  .response {
+    margin-top: 16px;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    display: none;
+    border: 1.5px solid transparent;
+  }
+  .response.show { display: block; }
+  .response.success {
+    background: var(--success-light);
+    border-color: #6EE7B7;
+    color: #065F46;
+  }
+  .response.error {
+    background: var(--danger-light);
+    border-color: #FCA5A5;
+    color: #7F1D1D;
+  }
+  .response.info {
+    background: var(--info-light);
+    border-color: #93C5FD;
+    color: #1E3A8A;
+  }
+  .response-title {
+    font-weight: 700;
+    font-size: 0.82rem;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .response-message {
+    font-size: 0.85rem;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+  .response pre {
+    background: rgba(0,0,0,0.05);
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 8px;
+    font-size: 0.72rem;
+    overflow-x: auto;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ========== RECEIPT PREVIEW ========== */
+  .receipt {
+    margin-top: 16px;
+    background: var(--cream);
+    border: 1.5px dashed var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: none;
+    font-size: 0.82rem;
+  }
+  .receipt.show { display: block; }
+  .receipt-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dashed #E5E7EB;
+  }
+  .receipt-row:last-child { border-bottom: none; }
+  .receipt-row .label { color: var(--text-muted); font-weight: 500; }
+  .receipt-row .value { font-weight: 600; color: var(--text); text-align: right; max-width: 60%; word-break: break-word; }
+
+  /* ========== TRANSACTIONS ========== */
+  .tx-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+  .tx-header h2 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tx-header h2 span.count {
+    background: var(--mpesa-green-light);
+    color: var(--mpesa-green-dark);
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  .btn-refresh {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .btn-refresh:hover {
+    background: var(--cream);
+    border-color: var(--mpesa-green);
+    color: var(--mpesa-green-dark);
+  }
+  .btn-refresh svg { width: 14px; height: 14px; }
+  .btn-refresh.spinning svg { animation: spin 0.6s linear; }
+
+  .tx-list {
+    background: var(--card);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,0.04);
+    overflow: hidden;
+  }
+  .tx-item {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s ease;
+  }
+  .tx-item:last-child { border-bottom: none; }
+  .tx-item:hover { background: #FAFAFA; }
+
+  .tx-avatar {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .tx-avatar.stk { background: var(--info-light); color: var(--info); }
+  .tx-avatar.b2c { background: var(--success-light); color: var(--success); }
+  .tx-avatar.callback { background: var(--warning-light); color: var(--warning); }
+
+  .tx-main { flex: 1; min-width: 0; }
+  .tx-line-1 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+  .tx-type {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .tx-line-2 {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .tx-line-2 .ref { font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; }
+  .tx-line-2 .reason {
+    color: var(--danger);
+    font-weight: 500;
+    font-size: 0.75rem;
+  }
+
+  .tx-amount {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .tx-amount .amt {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .tx-amount .amt::before { content: "KES "; font-size: 0.7rem; color: var(--text-muted); font-weight: 600; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .badge.success { background: var(--success-light); color: #065F46; }
+  .badge.failed  { background: var(--danger-light);  color: #991B1B; }
+  .badge.error   { background: var(--danger-light);  color: #991B1B; }
+  .badge.pending { background: var(--warning-light); color: #92400E; }
+  .badge.info    { background: var(--info-light);    color: #1E40AF; }
+  .badge.received { background: var(--cream-dark);   color: var(--text-muted); }
+
+  .empty {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+  .empty svg { width: 56px; height: 56px; opacity: 0.25; margin-bottom: 12px; }
+  .empty p { font-size: 0.85rem; }
+
+  /* ========== FOOTER ========== */
+  footer {
+    text-align: center;
+    padding: 28px 16px 12px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  footer .mpesa { color: var(--mpesa-green-dark); font-weight: 700; }
+
+  /* ========== TOAST ========== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: var(--text);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    transition: transform 0.3s ease;
+    z-index: 999;
+    max-width: 90vw;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--mpesa-green-dark); }
+  .toast.error { background: #991B1B; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo">PH</div>
+      <div class="brand-text">
+        <h1>PayHero</h1>
+        <p>M-Pesa STK Push Dashboard</p>
+      </div>
+    </div>
+    <div class="status-pill">
+      <span class="dot-live"></span>
+      <span>Live</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid grid-split">
+
+    <!-- =============== STK PUSH FORM =============== -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2"/>
+            <line x1="12" y1="18" x2="12" y2="18"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">Request Payment</div>
+          <div class="card-subtitle">Send an STK push to a customer's phone</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label for="phone">Phone Number</label>
+          <div class="input-wrap">
+            <span class="input-prefix">+254</span>
+            <input id="phone" class="has-prefix" type="tel" inputmode="numeric" placeholder="712345678" maxlength="10" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="amount">Amount (KES)</label>
+          <input id="amount" type="number" inputmode="numeric" placeholder="Enter amount" min="1" />
+          <div class="quick-amounts">
+            <div class="chip" data-amount="50">50</div>
+            <div class="chip" data-amount="100">100</div>
+            <div class="chip" data-amount="200">200</div>
+            <div class="chip" data-amount="500">500</div>
+            <div class="chip" data-amount="1000">1000</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="reference">Reference (optional)</label>
+          <input id="reference" type="text" placeholder="e.g. INV-001" />
+        </div>
+
+        <button id="sendBtn" class="btn btn-primary">
+          <span class="spinner"></span>
+          <span class="btn-label">Send STK Push</span>
+        </button>
+
+        <div id="response" class="response">
+          <div class="response-title" id="responseTitle"></div>
+          <div class="response-message" id="responseMessage"></div>
+          <pre id="responseRaw" style="display:none;"></pre>
+        </div>
+
+        <div id="receipt" class="receipt"></div>
+      </div>
+    </div>
+
+    <!-- =============== INFO CARD =============== -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">How it works</div>
+          <div class="card-subtitle">Simple 3-step M-Pesa flow</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <ol style="list-style:none; padding:0; display:flex; flex-direction:column; gap:14px; margin-top:6px;">
+          <li style="display:flex; gap:12px; align-items:flex-start;">
+            <span style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:var(--mpesa-green-light); color:var(--mpesa-green-dark); display:grid; place-items:center; font-weight:700; font-size:0.78rem;">1</span>
+            <div style="font-size:0.85rem;">
+              <strong style="color:var(--text);">Enter customer details</strong>
+              <p style="color:var(--text-muted); font-size:0.8rem; margin-top:2px;">Provide the phone number and amount to charge.</p>
+            </div>
+          </li>
+          <li style="display:flex; gap:12px; align-items:flex-start;">
+            <span style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:var(--mpesa-green-light); color:var(--mpesa-green-dark); display:grid; place-items:center; font-weight:700; font-size:0.78rem;">2</span>
+            <div style="font-size:0.85rem;">
+              <strong style="color:var(--text);">Customer receives prompt</strong>
+              <p style="color:var(--text-muted); font-size:0.8rem; margin-top:2px;">An M-Pesa STK prompt appears on their phone for PIN entry.</p>
+            </div>
+          </li>
+          <li style="display:flex; gap:12px; align-items:flex-start;">
+            <span style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:var(--mpesa-green-light); color:var(--mpesa-green-dark); display:grid; place-items:center; font-weight:700; font-size:0.78rem;">3</span>
+            <div style="font-size:0.85rem;">
+              <strong style="color:var(--text);">Payment confirmed</strong>
+              <p style="color:var(--text-muted); font-size:0.8rem; margin-top:2px;">You'll get a callback and the transaction appears below.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =============== TRANSACTIONS =============== -->
+  <div class="tx-header">
+    <h2>
+      Recent Transactions
+      <span class="count" id="txCount">0</span>
+    </h2>
+    <button class="btn-refresh" id="refreshBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/>
+        <polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+
+  <div class="tx-list" id="txList">
+    <div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="9" y1="15" x2="15" y2="15"/>
+      </svg>
+      <p>No transactions yet. Send your first STK push above.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Powered by <span class="mpesa">M-Pesa</span> &amp; PayHero API &middot; v2
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const phoneEl = $('phone');
+  const amountEl = $('amount');
+  const referenceEl = $('reference');
+  const sendBtn = $('sendBtn');
+  const responseEl = $('response');
+  const responseTitle = $('responseTitle');
+  const responseMessage = $('responseMessage');
+  const responseRaw = $('responseRaw');
+  const receiptEl = $('receipt');
+  const txList = $('txList');
+  const txCount = $('txCount');
+  const refreshBtn = $('refreshBtn');
+  const toastEl = $('toast');
+
+  // ======== Toast ========
+  let toastTimer;
+  function toast(msg, type = '') {
+    toastEl.textContent = msg;
+    toastEl.className = 'toast show ' + type;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toastEl.className = 'toast ' + type; }, 3500);
+  }
+
+  // ======== Quick-amount chips ========
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      amountEl.value = chip.dataset.amount;
+      amountEl.focus();
+    });
+  });
+
+  // ======== Phone input: enforce local 9-10 digits ========
+  phoneEl.addEventListener('input', () => {
+    phoneEl.value = phoneEl.value.replace(/\D/g, '').slice(0, 10);
+    // strip leading 0 automatically
+    if (phoneEl.value.startsWith('0')) phoneEl.value = phoneEl.value.slice(1);
+  });
+
+  // ======== Normalize phone to 2547XXXXXXXX ========
+  function toMsisdn(raw) {
+    let p = String(raw || '').replace(/\D/g, '');
+    if (p.startsWith('254')) return p;
+    if (p.startsWith('0')) return '254' + p.slice(1);
+    if (p.startsWith('7') || p.startsWith('1')) return '254' + p;
+    return p;
+  }
+
+  // ======== Response UI ========
+  function showResponse(kind, title, message, raw) {
+    responseEl.className = 'response show ' + kind;
+    responseTitle.textContent = title;
+    responseMessage.textContent = message || '';
+    if (raw) {
+      responseRaw.style.display = 'block';
+      responseRaw.textContent = typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2);
+    } else {
+      responseRaw.style.display = 'none';
+      responseRaw.textContent = '';
+    }
+  }
+  function hideResponse() {
+    responseEl.className = 'response';
+    receiptEl.className = 'receipt';
+    receiptEl.innerHTML = '';
+  }
+
+  // ======== Receipt preview ========
+  function showReceipt(data) {
+    const rows = [
+      ['Phone', data.phone],
+      ['Amount', `KES ${data.amount}`],
+      ['Reference', data.reference],
+      ['Status', data.status],
+      ['Time', new Date(data.createdAt).toLocaleString()],
+    ];
+    if (data.reason) rows.push(['Reason', data.reason]);
+
+    receiptEl.innerHTML =
+      '<div style="font-weight:700; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.4px; color:var(--text-muted); margin-bottom:10px;">Receipt Preview</div>' +
+      rows.map(([k, v]) =>
+        `<div class="receipt-row"><span class="label">${k}</span><span class="value">${escapeHtml(String(v ?? '—'))}</span></div>`
+      ).join('');
+    receiptEl.classList.add('show');
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  // ======== Send STK Push ========
+  sendBtn.addEventListener('click', async () => {
+    hideResponse();
+
+    const amount = Number(amountEl.value);
+    const localPhone = phoneEl.value.trim();
+    const reference = referenceEl.value.trim();
+
+    if (!localPhone || localPhone.length < 9) {
+      return showResponse('error', '⚠ Invalid Phone', 'Please enter a valid phone number (e.g., 712345678).');
+    }
+    if (!amount || amount < 1) {
+      return showResponse('error', '⚠ Invalid Amount', 'Please enter an amount of at least KES 1.');
+    }
+
+    const msisdn = toMsisdn(localPhone);
+
+    sendBtn.disabled = true;
+    sendBtn.classList.add('loading');
+    sendBtn.querySelector('.btn-label').textContent = 'Sending STK Push…';
+
+    try {
+      const res = await fetch('/api/stk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, phone: msisdn, reference }),
+      });
+      const json = await res.json();
+
+      const ok = json?.status === true;
+      if (ok) {
+        showResponse('success', '✅ STK Push Sent',
+          `Prompt sent to ${msisdn}. Await customer PIN entry.`, json.data);
+        toast('STK push sent successfully', 'success');
+        showReceipt({
+          phone: msisdn,
+          amount,
+          reference: reference || (json.data?.external_reference) || '—',
+          status: 'Sent',
+          reason: null,
+          createdAt: new Date().toISOString(),
+        });
+      } else {
+        const reason =
+          json?.data?.message ||
+          json?.data?.error ||
+          json?.message ||
+          json?.data?.error_message ||
+          'Request failed';
+        showResponse('error', '❌ STK Push Failed', reason, json.data || json);
+        toast('STK push failed', 'error');
+      }
+
+      loadTransactions();
+    } catch (err) {
+      showResponse('error', '❌ Network Error', err.message || 'Could not reach the server.');
+      toast('Network error', 'error');
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.classList.remove('loading');
+      sendBtn.querySelector('.btn-label').textContent = 'Send STK Push';
+    }
+  });
+
+  // ======== Status badge ========
+  function statusBadge(status) {
+    const s = String(status || '').toLowerCase().trim();
+    let cls = 'info';
+    if (['sent', 'success', 'accepted', 'completed'].includes(s)) cls = 'success';
+    else if (['failed', 'error', 'cancelled', 'rejected'].includes(s)) cls = 'failed';
+    else if (['pending', 'processing', 'queued'].includes(s)) cls = 'pending';
+    else if (s === 'received') cls = 'received';
+    return `<span class="badge ${cls}">${escapeHtml(status || 'unknown')}</span>`;
+  }
+
+  function typeLabel(type) {
+    const t = String(type || '').toUpperCase();
+    if (t === 'STK') return 'STK';
+    if (t === 'B2C') return 'B2C';
+    if (t === 'CALLBACK') return 'CBK';
+    return t.slice(0, 3);
+  }
+
+  function typeClass(type) {
+    const t = String(type || '').toLowerCase();
+    if (t === 'stk') return 'stk';
+    if (t === 'b2c') return 'b2c';
+    if (t === 'callback') return 'callback';
+    return 'stk';
+  }
+
+  // ======== Load transactions ========
+  async function loadTransactions(silent = false) {
+    if (!silent) refreshBtn.classList.add('spinning');
+    try {
+      const res = await fetch('/api/transactions');
+      const json = await res.json();
+      const data = Array.isArray(json?.data) ? json.data : [];
+
+      txCount.textContent = data.length;
+
+      if (!data.length) {
+        txList.innerHTML =
+          `<div class="empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+            <p>No transactions yet. Send your first STK push above.</p>
+          </div>`;
+        return;
+      }
+
+      txList.innerHTML = data.map(tx => {
+        const phone = tx.phone || '—';
+        const amount = tx.amount != null ? tx.amount : '—';
+        const ref = tx.reference || '';
+        const reason = tx.reason ? `<span class="reason">⚠ ${escapeHtml(tx.reason)}</span>` : '';
+        const time = tx.createdAt ? new Date(tx.createdAt).toLocaleTimeString() : '';
+        return `
+          <div class="tx-item">
+            <div class="tx-avatar ${typeClass(tx.type)}">${escapeHtml(typeLabel(tx.type))}</div>
+            <div class="tx-main">
+              <div class="tx-line-1">
+                <span class="tx-type">${escapeHtml(tx.type || 'TXN')}</span>
+                ${statusBadge(tx.status)}
+              </div>
+              <div class="tx-line-2">
+                <span>${escapeHtml(phone)}</span>
+                ${ref ? `<span class="ref">${escapeHtml(ref)}</span>` : ''}
+                <span>${escapeHtml(time)}</span>
+              </div>
+              ${reason ? `<div class="tx-line-2" style="margin-top:4px;">${reason}</div>` : ''}
+            </div>
+            <div class="tx-amount">
+              <div class="amt">${escapeHtml(String(amount))}</div>
+            </div>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      if (!silent) toast('Failed to load transactions', 'error');
+    } finally {
+      setTimeout(() => refreshBtn.classList.remove('spinning'), 400);
+    }
+  }
+
+  refreshBtn.addEventListener('click', () => loadTransactions(false));
+
+  // ======== Auto-refresh every 10s ========
+  loadTransactions(true);
+  setInterval(() => loadTransactions(true), 10000);
+})();
+</script>
+
+</body>
+  </html>
