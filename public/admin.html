@@ -3,1013 +3,1220 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Admin • PayHero Auto STK</title>
+<title>JobPay Admin</title>
 <style>
   :root {
-    --mpesa-green: #00A651;
-    --mpesa-green-dark: #007A3D;
-    --mpesa-green-light: #E6F7EE;
-    --cream: #FDF6E3;
-    --cream-dark: #F5EEDC;
-    --card: #FFFFFF;
-    --text: #1F2937;
-    --text-muted: #6B7280;
-    --border: #E5E7EB;
-    --danger: #DC2626;
-    --danger-light: #FEE2E2;
-    --warning: #D97706;
-    --warning-light: #FEF3C7;
-    --info: #2563EB;
-    --info-light: #DBEAFE;
-    --success: #059669;
-    --success-light: #D1FAE5;
-    --shadow: 0 4px 12px rgba(0,0,0,0.06);
-    --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+    --green:#43B02A; --green-dark:#2E7D1E; --green-light:#E8F7E4;
+    --red:#E60000; --red-light:#FDEAEA; --ink:#1A1A1A;
+    --gray-700:#4D4D4D; --gray-500:#7A7A7A; --gray-200:#E4E4E4;
+    --gray-100:#F2F2F2; --gray-50:#F8F8F8; --white:#FFFFFF;
+    --yellow:#F5A623; --gold:#D4AF37; --blue:#2196F3; --purple:#9C27B0;
+    --radius:14px; --shadow:0 4px 20px rgba(0,0,0,0.07);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: var(--cream); color: var(--text); min-height: 100vh;
-    padding-bottom: 40px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--gray-50); color:var(--ink); font-size:14px;
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+    min-height:100vh; padding-bottom:40px;
   }
-
-  /* ---------- HEADER ---------- */
-  header {
-    background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
-    color: #fff; padding: 22px 20px 56px; position: relative; overflow: hidden;
+  .login-wrap {
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; padding:20px; background:linear-gradient(135deg,#1A1A1A,#2E7D1E);
   }
-  header::before {
-    content: ""; position: absolute; top: -80px; right: -80px;
-    width: 220px; height: 220px; background: rgba(0,166,81,0.18); border-radius: 50%;
-  }
-  .header-inner {
-    max-width: 1040px; margin: 0 auto; position: relative; z-index: 1;
-    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-  }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .brand-logo {
-    width: 46px; height: 46px; border-radius: 12px; background: var(--mpesa-green);
-    display: grid; place-items: center; font-weight: 800; font-size: 18px; color: #fff;
-    box-shadow: 0 4px 12px rgba(0,166,81,0.4);
-  }
-  .brand-text h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px; }
-  .brand-text p { font-size: 0.76rem; opacity: 0.7; margin-top: 2px; }
-  .header-right { display: flex; align-items: center; gap: 10px; }
-  .status-pill {
-    display: inline-flex; align-items: center; gap: 7px;
-    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
-    padding: 7px 13px; border-radius: 999px; font-size: 0.75rem; font-weight: 600;
-  }
-  .dot-live { width: 8px; height: 8px; background: #6B7280; border-radius: 50%; transition: background .2s; }
-  .dot-live.on { background: #4ADE80; animation: pulse 1.8s infinite; }
-  @keyframes pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.6); }
-    70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
-    100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
-  }
-  .btn-ghost {
-    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-    color: #fff; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem;
-    font-weight: 600; cursor: pointer; font-family: inherit; transition: background .15s;
-  }
-  .btn-ghost:hover { background: rgba(255,255,255,0.2); }
-
-  /* ---------- LAYOUT ---------- */
-  .container { max-width: 1040px; margin: -34px auto 0; padding: 0 16px; position: relative; z-index: 2; }
-  .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-  @media (min-width: 820px) { .grid-split { grid-template-columns: 1fr 1fr; } }
-
-  .card {
-    background: var(--card); border-radius: 16px; box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(0,0,0,0.04); overflow: hidden;
-  }
-  .card-header { padding: 18px 20px 6px; display: flex; align-items: center; gap: 12px; }
-  .card-icon {
-    width: 38px; height: 38px; border-radius: 10px; background: var(--mpesa-green-light);
-    display: grid; place-items: center; color: var(--mpesa-green-dark); flex-shrink: 0;
-  }
-  .card-icon svg { width: 19px; height: 19px; }
-  .card-title { font-size: 0.98rem; font-weight: 700; letter-spacing: -0.2px; }
-  .card-subtitle { font-size: 0.76rem; color: var(--text-muted); margin-top: 1px; }
-  .card-body { padding: 6px 20px 20px; }
-
-  /* ---------- MASTER SWITCH CARD ---------- */
-  .master {
-    padding: 20px; display: flex; align-items: center; justify-content: space-between;
-    gap: 16px; flex-wrap: wrap;
-    background: linear-gradient(135deg, #fff 0%, #F8FFFb 100%);
-  }
-  .master-left { display: flex; align-items: center; gap: 14px; }
-  .master-icon {
-    width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center;
-    background: var(--cream-dark); color: var(--text-muted); transition: all .25s; flex-shrink: 0;
-  }
-  .master-icon.on { background: var(--mpesa-green-light); color: var(--mpesa-green-dark); }
-  .master-icon svg { width: 24px; height: 24px; }
-  .master-title { font-size: 1.02rem; font-weight: 700; }
-  .master-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
-
-  /* ---------- TOGGLE SWITCH ---------- */
-  .switch { position: relative; display: inline-block; width: 58px; height: 32px; flex-shrink: 0; }
-  .switch input { opacity: 0; width: 0; height: 0; }
-  .slider {
-    position: absolute; cursor: pointer; inset: 0; background: #CBD5E1;
-    transition: .25s; border-radius: 999px;
-  }
-  .slider:before {
-    position: absolute; content: ""; height: 24px; width: 24px; left: 4px; bottom: 4px;
-    background: #fff; transition: .25s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  }
-  .switch input:checked + .slider { background: var(--mpesa-green); }
-  .switch input:checked + .slider:before { transform: translateX(26px); }
-  .switch.small { width: 44px; height: 24px; }
-  .switch.small .slider:before { height: 18px; width: 18px; left: 3px; bottom: 3px; }
-  .switch.small input:checked + .slider:before { transform: translateX(20px); }
-
-  /* ---------- STATUS BAR ---------- */
-  .statusbar {
-    margin-top: 14px; background: #fff; border-radius: 12px; padding: 12px 16px;
-    box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.04);
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 0.82rem;
-  }
-  .sb-dot { width: 9px; height: 9px; border-radius: 50%; background: #9CA3AF; flex-shrink: 0; }
-  .sb-dot.on { background: var(--mpesa-green); animation: pulse 1.8s infinite; }
-  .sb-dot.err { background: var(--danger); }
-  .sb-main { font-weight: 700; }
-  .sb-meta { color: var(--text-muted); font-size: 0.78rem; }
-  .sb-sep { width: 1px; height: 16px; background: var(--border); }
-
-  /* ---------- FORM FIELDS ---------- */
-  .field { margin-top: 14px; }
-  .field label {
-    display: block; font-size: 0.72rem; font-weight: 700; color: var(--text-muted);
-    margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px;
-  }
-  .hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 5px; }
-  .input-wrap { position: relative; display: flex; align-items: center; }
-  .input-prefix {
-    position: absolute; left: 13px; font-size: 0.86rem; font-weight: 600;
-    color: var(--text-muted); pointer-events: none;
-  }
-  .input-wrap input.has-prefix { padding-left: 50px; }
-  input[type="text"], input[type="number"], input[type="tel"], input[type="password"] {
-    width: 100%; padding: 12px 13px; border-radius: 10px; border: 1.5px solid var(--border);
-    background: var(--cream); color: var(--text); font-size: 0.92rem; font-weight: 500;
-    outline: none; transition: all 0.15s ease; font-family: inherit;
-  }
-  input:focus {
-    border-color: var(--mpesa-green); background: #fff;
-    box-shadow: 0 0 0 3px rgba(0,166,81,0.12);
-  }
-  input::placeholder { color: #B0B7C3; font-weight: 400; }
-  input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-  input[type=number] { -moz-appearance: textfield; }
-
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  .check-row {
-    display: flex; align-items: center; gap: 10px; margin-top: 16px;
-    padding: 12px 14px; border-radius: 10px; background: var(--cream); border: 1.5px solid var(--border);
-  }
-  .check-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--mpesa-green); cursor: pointer; }
-  .check-row label { font-size: 0.84rem; font-weight: 600; cursor: pointer; }
-  .check-row .sub { font-size: 0.72rem; color: var(--text-muted); font-weight: 400; display: block; margin-top: 1px; }
-
-  /* ---------- BUTTONS ---------- */
-  .btn {
-    padding: 13px; border: none; border-radius: 10px; font-size: 0.92rem; font-weight: 700;
-    cursor: pointer; transition: all 0.15s ease; font-family: inherit;
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; margin-top: 18px; letter-spacing: 0.2px;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-green-dark) 100%);
-    color: #fff; box-shadow: 0 4px 14px rgba(0,166,81,0.3);
-  }
-  .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,166,81,0.42); }
-  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
-
-  .btn-sm {
-    padding: 7px 12px; border-radius: 8px; font-size: 0.74rem; font-weight: 700;
-    border: 1.5px solid var(--border); background: #fff; color: var(--text);
-    cursor: pointer; font-family: inherit; transition: all .15s; white-space: nowrap;
-  }
-  .btn-sm:hover { border-color: var(--mpesa-green); color: var(--mpesa-green-dark); background: var(--mpesa-green-light); }
-  .btn-sm.danger:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-light); }
-  .btn-sm:disabled { opacity: .5; cursor: not-allowed; }
-
-  /* ---------- SECTION HEADERS ---------- */
-  .sec-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin: 28px 0 12px; padding: 0 4px; gap: 12px; flex-wrap: wrap;
-  }
-  .sec-header h2 { font-size: 0.94rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-  .sec-header .count {
-    background: var(--mpesa-green-light); color: var(--mpesa-green-dark);
-    font-size: 0.7rem; padding: 3px 9px; border-radius: 999px; font-weight: 700;
-  }
-  .btn-refresh {
-    background: #fff; border: 1.5px solid var(--border); color: var(--text);
-    padding: 7px 14px; border-radius: 8px; font-size: 0.77rem; font-weight: 600;
-    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-    transition: all 0.15s ease; font-family: inherit;
-  }
-  .btn-refresh:hover { background: var(--cream); border-color: var(--mpesa-green); color: var(--mpesa-green-dark); }
-  .btn-refresh svg { width: 14px; height: 14px; }
-  .btn-refresh.spinning svg { animation: spin .6s linear; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ---------- LISTS ---------- */
-  .list {
-    background: var(--card); border-radius: 14px; box-shadow: var(--shadow);
-    border: 1px solid rgba(0,0,0,0.04); overflow: hidden;
-  }
-  .list-item {
-    padding: 13px 16px; display: flex; align-items: center; gap: 12px;
-    border-bottom: 1px solid var(--border); transition: background .15s;
-  }
-  .list-item:last-child { border-bottom: none; }
-  .list-item:hover { background: #FAFAFA; }
-  .list-item.inactive { background: #FAFAFA; opacity: 0.72; }
-
-  .avatar {
-    width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
-    font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
-  }
-  .avatar.num { background: var(--info-light); color: var(--info); }
-  .avatar.num.off { background: #F3F4F6; color: #9CA3AF; }
-  .avatar.stk { background: var(--info-light); color: var(--info); }
-  .avatar.callback { background: var(--warning-light); color: var(--warning); }
-
-  .item-main { flex: 1; min-width: 0; }
-  .item-line1 { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; flex-wrap: wrap; }
-  .item-phone { font-size: 0.86rem; font-weight: 700; letter-spacing: 0.2px; font-variant-numeric: tabular-nums; }
-  .item-line2 {
-    font-size: 0.74rem; color: var(--text-muted); display: flex; gap: 10px;
-    flex-wrap: wrap; align-items: center;
-  }
-  .item-line2 .ref { font-family: ui-monospace, Menlo, monospace; font-size: 0.7rem; }
-  .item-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-
-  .badge {
-    display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.66rem;
-    font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
-  }
-  .badge.success { background: var(--success-light); color: #065F46; }
-  .badge.failed  { background: var(--danger-light);  color: #991B1B; }
-  .badge.error   { background: var(--danger-light);  color: #991B1B; }
-  .badge.pending { background: var(--warning-light); color: #92400E; }
-  .badge.info    { background: var(--info-light);    color: #1E40AF; }
-  .badge.off     { background: #F3F4F6; color: #6B7280; }
-
-  .amt { font-size: 0.9rem; font-weight: 700; text-align: right; flex-shrink: 0; }
-  .amt::before { content: "KES "; font-size: 0.66rem; color: var(--text-muted); font-weight: 600; }
-
-  .empty { padding: 44px 24px; text-align: center; color: var(--text-muted); }
-  .empty svg { width: 52px; height: 52px; opacity: 0.22; margin-bottom: 12px; }
-  .empty p { font-size: 0.84rem; }
-
-  /* ---------- LOGIN OVERLAY ---------- */
-  .overlay {
-    position: fixed; inset: 0; background: rgba(17,24,39,0.92);
-    display: none; place-items: center; z-index: 1000; padding: 20px;
-    backdrop-filter: blur(6px);
-  }
-  .overlay.show { display: grid; }
-  .login-box {
-    background: #fff; border-radius: 18px; padding: 30px 26px; width: 100%;
-    max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: center;
+  .login-card {
+    background:white; border-radius:18px; padding:32px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.3); width:100%; max-width:400px;
   }
   .login-logo {
-    width: 56px; height: 56px; border-radius: 14px; background: var(--mpesa-green);
-    color: #fff; display: grid; place-items: center; margin: 0 auto 16px;
-    font-weight: 800; font-size: 20px; box-shadow: 0 6px 18px rgba(0,166,81,0.35);
+    width:60px; height:60px; border-radius:16px; margin:0 auto 16px;
+    background:linear-gradient(135deg,var(--green),#7AC943);
+    display:grid; place-items:center; color:white; font-size:28px;
+    box-shadow:0 6px 20px rgba(67,176,42,0.4);
   }
-  .login-box h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
-  .login-box p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; }
-  .login-box input { text-align: center; letter-spacing: 2px; }
-  .login-err { color: var(--danger); font-size: 0.78rem; margin-top: 12px; min-height: 18px; font-weight: 600; }
-
-  /* ---------- TOAST ---------- */
-  .toast {
-    position: fixed; bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(140%);
-    background: var(--text); color: #fff; padding: 12px 20px; border-radius: 10px;
-    font-size: 0.84rem; font-weight: 500; box-shadow: var(--shadow-lg);
-    transition: transform 0.3s cubic-bezier(.2,.9,.3,1.2); z-index: 2000;
-    max-width: 90vw; text-align: center;
+  .login-title { font-size:22px; font-weight:900; text-align:center; margin-bottom:6px; }
+  .login-sub { font-size:13px; color:var(--gray-500); text-align:center; margin-bottom:24px; font-weight:600; }
+  .field { margin-bottom:14px; }
+  .field label { display:block; font-size:12px; font-weight:700; color:var(--gray-700); margin-bottom:6px; }
+  .field input, .field select, .field textarea {
+    width:100%; padding:13px 14px; font-size:15px; font-family:inherit;
+    font-weight:600; color:var(--ink); background:var(--gray-50);
+    border:1.5px solid var(--gray-200); border-radius:12px; outline:none;
   }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.success { background: var(--mpesa-green-dark); }
-  .toast.error { background: #991B1B; }
-
-  footer { text-align: center; padding: 28px 16px 12px; font-size: 0.74rem; color: var(--text-muted); }
-  footer .mpesa { color: var(--mpesa-green-dark); font-weight: 700; }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color:var(--green); background:var(--white);
+    box-shadow:0 0 0 3px rgba(67,176,42,0.15);
+  }
+  .btn {
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:15px 20px; font-size:15px; font-weight:800;
+    font-family:inherit; border:none; border-radius:12px; cursor:pointer;
+    transition:transform .1s;
+  }
+  .btn:active:not(:disabled) { transform:scale(0.98); }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .btn-primary { background:linear-gradient(135deg,var(--green),var(--green-dark)); color:white; box-shadow:0 6px 20px rgba(67,176,42,0.3); }
+  .msg { padding:12px 14px; border-radius:10px; margin-bottom:14px; font-size:13px; font-weight:700; display:none; }
+  .msg.show { display:block; }
+  .msg.error { background:var(--red-light); color:var(--red); }
+  .msg.success { background:var(--green-light); color:var(--green-dark); }
+  .layout { display:none; min-height:100vh; }
+  .layout.show { display:block; }
+  .topbar {
+    background:#1A1A1A; color:white; padding:14px 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    position:sticky; top:0; z-index:10;
+  }
+  .topbar-brand { display:flex; align-items:center; gap:10px; }
+  .topbar-mark {
+    width:34px; height:34px; border-radius:10px;
+    background:linear-gradient(135deg,var(--green),#7AC943);
+    display:grid; place-items:center; font-weight:900; font-size:15px;
+  }
+  .topbar-title { font-size:15px; font-weight:900; letter-spacing:-0.3px; }
+  .topbar-title span { color:var(--green); }
+  .topbar-badge { background:var(--red); padding:4px 10px; border-radius:999px; font-size:10px; font-weight:900; letter-spacing:0.5px; }
+  .topbar-right { display:flex; align-items:center; gap:8px; }
+  .refresh-btn {
+    background:none; border:1.5px solid rgba(255,255,255,0.2);
+    color:white; border-radius:8px; padding:6px 12px;
+    font-size:11px; font-weight:800; cursor:pointer; font-family:inherit;
+  }
+  .container { max-width:1400px; margin:0 auto; padding:20px; }
+  .tabs {
+    display:flex; gap:6px; margin-bottom:20px; overflow-x:auto;
+    padding-bottom:4px; border-bottom:1px solid var(--gray-200);
+  }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab {
+    padding:10px 16px; border:none; background:none; font-family:inherit;
+    font-size:13px; font-weight:700; color:var(--gray-500); cursor:pointer;
+    border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap;
+  }
+  .tab.active { color:var(--green); border-bottom-color:var(--green); }
+  .tab-pane { display:none; }
+  .tab-pane.active { display:block; animation:fade .2s; }
+  @keyframes fade { from{opacity:0;} to{opacity:1;} }
+  .stat-grid {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:14px; margin-bottom:24px;
+  }
+  .stat-card {
+    background:white; border-radius:var(--radius); padding:18px;
+    box-shadow:var(--shadow); border:1px solid var(--gray-200);
+    position:relative; overflow:hidden;
+  }
+  .stat-card::before {
+    content:''; position:absolute; top:0; left:0; width:4px; height:100%;
+    background:var(--green);
+  }
+  .stat-card.red::before { background:var(--red); }
+  .stat-card.blue::before { background:var(--blue); }
+  .stat-card.gold::before { background:var(--gold); }
+  .stat-card.purple::before { background:var(--purple); }
+  .stat-card.yellow::before { background:var(--yellow); }
+  .stat-ic {
+    width:38px; height:38px; border-radius:12px; background:var(--green-light);
+    display:grid; place-items:center; font-size:20px; margin-bottom:12px;
+  }
+  .stat-card.red .stat-ic { background:var(--red-light); }
+  .stat-card.blue .stat-ic { background:#E3F2FD; }
+  .stat-card.gold .stat-ic { background:#FFF8E1; }
+  .stat-card.purple .stat-ic { background:#F3E5F5; }
+  .stat-card.yellow .stat-ic { background:#FFF3CD; }
+  .stat-lbl { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.6px; color:var(--gray-500); margin-bottom:4px; }
+  .stat-val { font-size:26px; font-weight:900; letter-spacing:-0.5px; line-height:1; font-variant-numeric:tabular-nums; }
+  .stat-sub { font-size:11px; color:var(--gray-500); margin-top:6px; font-weight:700; }
+  .table-card {
+    background:white; border-radius:var(--radius); overflow:hidden;
+    box-shadow:var(--shadow); border:1px solid var(--gray-200);
+    margin-bottom:20px;
+  }
+  .table-head {
+    padding:16px 20px; border-bottom:1px solid var(--gray-200);
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .table-title { font-size:15px; font-weight:900; }
+  .table-title span { color:var(--gray-500); font-size:12px; font-weight:700; margin-left:6px; }
+  .search-input {
+    padding:9px 14px; border-radius:10px; border:1.5px solid var(--gray-200);
+    font-size:13px; font-family:inherit; font-weight:600; background:var(--gray-50);
+    outline:none; min-width:220px;
+  }
+  .search-input:focus { border-color:var(--green); background:white; }
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th {
+    text-align:left; padding:12px 16px; background:var(--gray-50);
+    font-size:10px; font-weight:900; text-transform:uppercase;
+    letter-spacing:0.6px; color:var(--gray-500); border-bottom:1px solid var(--gray-200);
+    white-space:nowrap;
+  }
+  td { padding:12px 16px; border-bottom:1px solid var(--gray-100); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover { background:var(--gray-50); }
+  .pill {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 9px; border-radius:999px;
+    font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.4px;
+    white-space:nowrap;
+  }
+  .pill.green { background:var(--green-light); color:var(--green-dark); }
+  .pill.red { background:var(--red-light); color:var(--red); }
+  .pill.yellow { background:#FFF3CD; color:#8A6D3B; }
+  .pill.gold { background:#FFF8E1; color:#8D6E00; }
+  .pill.blue { background:#E3F2FD; color:#0D47A1; }
+  .pill.gray { background:var(--gray-100); color:var(--gray-700); }
+  .pill.purple { background:#F3E5F5; color:#6A1B9A; }
+  .mono { font-family:ui-monospace,Menlo,monospace; font-size:11px; }
+  .truncate { max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .empty { text-align:center; padding:50px 20px; color:var(--gray-500); font-weight:600; font-size:13px; }
+  .empty-ic { font-size:38px; margin-bottom:10px; opacity:0.4; }
+  .pager {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; border-top:1px solid var(--gray-200); font-size:12px;
+    font-weight:700; color:var(--gray-500); gap:10px; flex-wrap:wrap;
+  }
+  .pager-btns { display:flex; gap:6px; }
+  .pager-btn {
+    padding:6px 12px; border-radius:8px; border:1.5px solid var(--gray-200);
+    background:white; font-family:inherit; font-size:12px; font-weight:800;
+    cursor:pointer; color:var(--ink);
+  }
+  .pager-btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .sub-badge { font-size:10px; font-weight:900; padding:3px 8px; border-radius:6px; }
+  .sub-badge.free{ background:var(--gray-100); color:var(--gray-500); }
+  .sub-badge.classic{ background:var(--green-light); color:var(--green-dark); }
+  .sub-badge.premium{ background:#E3F2FD; color:#0D47A1; }
+  .sub-badge.golden{ background:#FFF8E1; color:#8D6E00; }
+  .switch { position:relative; width:46px; height:26px; flex-shrink:0; display:inline-block; }
+  .switch input { opacity:0; width:0; height:0; }
+  .switch .slider { position:absolute; cursor:pointer; inset:0; background:var(--gray-200); border-radius:999px; transition:background 0.2s; }
+  .switch .slider::before { content:''; position:absolute; height:20px; width:20px; left:3px; top:3px; background:white; border-radius:50%; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+  .switch input:checked + .slider { background:var(--green); }
+  .switch input:checked + .slider::before { transform:translateX(20px); }
+  .checkbox-row { display:flex; align-items:center; gap:8px; font-weight:700; font-size:13px; margin:6px 0 14px; }
+  .grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  @media (max-width:600px) {
+    .container { padding:14px; }
+    .stat-val { font-size:22px; }
+    th, td { padding:10px 10px; font-size:12px; }
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="header-inner">
-    <div class="brand">
-      <div class="brand-logo">PH</div>
-      <div class="brand-text">
-        <h1>PayHero Admin</h1>
-        <p>Auto STK Push Control Panel</p>
-      </div>
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-logo">🛡</div>
+    <div class="login-title">Admin Panel</div>
+    <div class="login-sub">JobPay Control Center</div>
+    <div class="msg" id="loginMsg"></div>
+    <div class="field">
+      <label for="adminUser">Username</label>
+      <input type="text" id="adminUser" placeholder="admin" autocomplete="username" />
     </div>
-    <div class="header-right">
-      <div class="status-pill">
-        <span class="dot-live" id="headerDot"></span>
-        <span id="headerStatus">Idle</span>
-      </div>
-      <button class="btn-ghost" id="lockBtn">🔒 Lock</button>
+    <div class="field">
+      <label for="adminPass">Password</label>
+      <input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="btn btn-primary" id="loginBtn" style="margin-top:6px;">Sign In</button>
+  </div>
+</div>
+
+<div class="layout" id="layout">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-mark">◆</div>
+      <div class="topbar-title">JobPay <span>Admin</span></div>
+      <span class="topbar-badge">LIVE</span>
+    </div>
+    <div class="topbar-right">
+      <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
+      <button class="refresh-btn" id="logoutBtn">Logout</button>
     </div>
   </div>
-</header>
 
-<div class="container">
+  <div class="container">
+    <div class="stat-grid" id="statsGrid"></div>
 
-  <!-- ============ MASTER SWITCH ============ -->
-  <div class="card master">
-    <div class="master-left">
-      <div class="master-icon" id="masterIcon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-        </svg>
-      </div>
-      <div>
-        <div class="master-title">Auto STK Push</div>
-        <div class="master-sub" id="masterSub">Disabled — no automatic pushes will be sent</div>
+    <div class="tabs">
+      <button class="tab active" data-tab="users">👥 Users</button>
+      <button class="tab" data-tab="subs">⭐ Subscriptions</button>
+      <button class="tab" data-tab="txns">💳 Transactions</button>
+      <button class="tab" data-tab="pending">⏳ Pending Rewards</button>
+      <button class="tab" data-tab="withdrawals">💸 Withdrawals</button>
+      <button class="tab" data-tab="stk">📡 STK Control</button>
+      <button class="tab" data-tab="tasks">📋 Tasks</button>
+      <button class="tab" data-tab="system">⚙️ System</button>
+      <button class="tab" data-tab="visits">👀 Visits</button>
+      <button class="tab" data-tab="logins">🔐 Logins</button>
+      <button class="tab" data-tab="settings">💵 Pricing</button>
+    </div>
+
+    <!-- USERS -->
+    <div class="tab-pane active" id="pane-users">
+      <div class="table-card">
+        <div class="table-head">
+          <div class="table-title">All Users <span id="usersCount">—</span></div>
+          <input class="search-input" id="userSearch" placeholder="Search name, email, phone..." />
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Username</th><th>Email</th><th>Phone</th><th>Plan</th><th>Activation</th><th>Available</th><th>Pending</th><th>Earned</th><th>Last Login</th><th>Joined</th></tr></thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+        <div class="pager"><span id="usersPageInfo">—</span>
+          <div class="pager-btns"><button class="pager-btn" data-page-prev="users">← Prev</button><button class="pager-btn" data-page-next="users">Next →</button></div>
+        </div>
       </div>
     </div>
-    <label class="switch">
-      <input type="checkbox" id="autoToggle" />
-      <span class="slider"></span>
-    </label>
-  </div>
 
-  <!-- ============ STATUS BAR ============ -->
-  <div class="statusbar">
-    <span class="sb-dot" id="sbDot"></span>
-    <span class="sb-main" id="sbMain">Idle</span>
-    <span class="sb-sep"></span>
-    <span class="sb-meta" id="sbNext">—</span>
-    <span class="sb-sep"></span>
-    <span class="sb-meta" id="sbRounds">Rounds: 0</span>
-    <span class="sb-sep"></span>
-    <span class="sb-meta" id="sbActive">Active numbers: 0</span>
-  </div>
+    <!-- SUBS -->
+    <div class="tab-pane" id="pane-subs">
+      <div class="table-card">
+        <div class="table-head"><div class="table-title">Active Subscriptions <span id="subsCount">—</span></div></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Username</th><th>Email</th><th>Phone</th><th>Tier</th><th>Expires</th><th>Days Left</th></tr></thead>
+          <tbody id="subsBody"></tbody>
+        </table></div>
+      </div>
+    </div>
 
-  <div class="grid grid-split" style="margin-top:16px;">
-
-    <!-- ============ SETTINGS ============ -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
+    <!-- TXNS -->
+    <div class="tab-pane" id="pane-txns">
+      <div class="table-card">
+        <div class="table-head">
+          <div class="table-title">Transactions <span id="txnsCount">—</span></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="pager-btn txn-filter-btn" data-txn-filter="" style="background:var(--green-light);">All</button>
+            <button class="pager-btn txn-filter-btn" data-txn-filter="completed">✓ Completed</button>
+            <button class="pager-btn txn-filter-btn" data-txn-filter="failed">✕ Failed</button>
+            <button class="pager-btn txn-filter-btn" data-txn-filter="pending">⏳ Pending</button>
+          </div>
         </div>
-        <div>
-          <div class="card-title">Sending Schedule</div>
-          <div class="card-subtitle">Control timing and default values</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>User</th><th>Type</th><th>Amount</th><th>Phone</th><th>Status</th><th>Retries</th><th>MPESA Ref</th><th>When</th><th>Action</th></tr></thead>
+          <tbody id="txnsBody"></tbody>
+        </table></div>
+        <div class="pager"><span id="txnsPageInfo">—</span>
+          <div class="pager-btns"><button class="pager-btn" data-page-prev="txns">← Prev</button><button class="pager-btn" data-page-next="txns">Next →</button></div>
         </div>
       </div>
-      <div class="card-body">
-        <div class="row2">
-          <div class="field">
-            <label for="intervalSeconds">Gap between numbers</label>
-            <input id="intervalSeconds" type="number" min="2" placeholder="30" />
-            <div class="hint">Seconds</div>
-          </div>
-          <div class="field">
-            <label for="cycleDelaySeconds">Gap before repeat</label>
-            <input id="cycleDelaySeconds" type="number" min="5" placeholder="60" />
-            <div class="hint">Seconds</div>
+    </div>
+
+    <!-- PENDING REWARDS -->
+    <div class="tab-pane" id="pane-pending">
+      <div class="table-card">
+        <div class="table-head">
+          <div class="table-title">Pending Task Rewards <span id="pendingCount">—</span></div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div style="font-size:14px;font-weight:900;color:#D4901A;" id="pendingTotal">KES 0</div>
+            <button class="pager-btn" id="confirmAllBtn" style="background:var(--green);color:white;border-color:var(--green);padding:8px 14px;">✓ Confirm All</button>
           </div>
         </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>User</th><th>Task</th><th>Owner</th><th>Answers</th><th>Amount</th><th>Submitted</th><th>Action</th></tr></thead>
+          <tbody id="pendingBody"></tbody>
+        </table></div>
+      </div>
+    </div>
 
-        <div class="row2">
+    <!-- WITHDRAWALS -->
+    <div class="tab-pane" id="pane-withdrawals">
+      <div class="table-card">
+        <div class="table-head">
+          <div class="table-title">Pending Withdrawals <span id="wdrCount">—</span></div>
+          <div style="font-size:14px;font-weight:900;color:#D4901A;" id="wdrTotal">KES 0</div>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>User</th><th>Phone</th><th>Amount</th><th>Requested</th><th>Action</th></tr></thead>
+          <tbody id="wdrBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- STK CONTROL -->
+    <div class="tab-pane" id="pane-stk">
+      <div class="table-card" style="margin-bottom:20px;">
+        <div class="table-head"><div class="table-title">Retry Interval</div></div>
+        <div style="padding:22px; max-width:520px;">
+          <div class="msg" id="stkCfgMsg"></div>
           <div class="field">
-            <label for="defaultAmount">Default amount</label>
-            <input id="defaultAmount" type="number" min="1" placeholder="1" />
-            <div class="hint">Used when a number has no amount</div>
+            <label for="stkInterval">Send STK every (minutes)</label>
+            <input type="number" id="stkInterval" min="1" max="1440" step="1" />
           </div>
-          <div class="field">
-            <label for="defaultReference">Default reference</label>
-            <input id="defaultReference" type="text" placeholder="AUTO-STK" />
-            <div class="hint">Optional tag</div>
+          <button class="btn btn-primary" id="saveStkIntervalBtn">Save Interval</button>
+          <div style="font-size:12px;color:var(--gray-500);margin-top:12px;font-weight:600;">
+            Applies to all new STK pushes. Existing retries keep their original interval.
           </div>
         </div>
+      </div>
 
-        <div class="check-row">
-          <input type="checkbox" id="repeat" />
-          <label for="repeat">
-            Repeat continuously
-            <span class="sub">If off, one full round is sent then auto-push stops</span>
+      <div class="table-card" style="margin-bottom:20px;">
+        <div class="table-head"><div class="table-title">📤 Send STK to a List of Numbers</div></div>
+        <div style="padding:22px;">
+          <div class="msg" id="batchMsg"></div>
+          <div class="field">
+            <label for="batchLabel">Batch Label (optional)</label>
+            <input type="text" id="batchLabel" placeholder="e.g. Weekend promo" />
+          </div>
+          <div class="field">
+            <label for="batchNumbers">Phone Numbers — one per line, or comma-separated</label>
+            <textarea id="batchNumbers" rows="6" placeholder="0712345678&#10;0723456789&#10;254733456789"></textarea>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="batchAmount">Amount (KES)</label>
+              <input type="number" id="batchAmount" min="1" value="50" />
+            </div>
+            <div class="field">
+              <label for="batchKind">Type</label>
+              <select id="batchKind">
+                <option value="custom">Custom</option>
+                <option value="subscription">Subscription</option>
+                <option value="deposit">Deposit</option>
+                <option value="activation">Activation</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="batchTier">Tier (if subscription)</label>
+              <select id="batchTier">
+                <option value="">—</option>
+                <option value="classic">Classic</option>
+                <option value="premium">Premium</option>
+                <option value="golden">Golden</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="batchInterval">Interval Override (min)</label>
+              <input type="number" id="batchInterval" min="1" placeholder="default" />
+            </div>
+          </div>
+          <label class="checkbox-row">
+            <input type="checkbox" id="batchAutoRetry" checked />
+            Keep re-sending every N minutes until stopped
           </label>
+          <button class="btn btn-primary" id="sendBatchBtn">📤 Send STK to All</button>
         </div>
+      </div>
 
-        <button class="btn btn-primary" id="saveSettingsBtn">
-          <span class="btn-label">Save Settings</span>
-        </button>
+      <div class="table-card" style="margin-bottom:20px;">
+        <div class="table-head">
+          <div class="table-title">Active Recurring STK <span id="stkActiveCount">—</span></div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input class="search-input" id="stkSearch" placeholder="Filter by phone..." />
+            <button class="pager-btn" id="stopAllStkBtn" style="background:var(--red);color:white;border-color:var(--red);padding:8px 14px;">⏹ Stop All</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Phone</th><th>Count</th><th>Amount</th><th>Types</th><th>Max Retries</th><th>Next In</th><th>Last Sent</th><th>Errors</th><th>Action</th></tr></thead>
+          <tbody id="stkGroupedBody"></tbody>
+        </table></div>
+      </div>
+
+      <div class="table-card" style="margin-bottom:20px;">
+        <div class="table-head"><div class="table-title">Individual Recurring Transactions</div></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Reference</th><th>User</th><th>Phone</th><th>Kind</th><th>Amount</th><th>Retries</th><th>Interval</th><th>Next Retry</th><th>Last Status</th><th>Action</th></tr></thead>
+          <tbody id="stkItemsBody"></tbody>
+        </table></div>
+      </div>
+
+      <div class="table-card" style="margin-bottom:20px;">
+        <div class="table-head"><div class="table-title">Blocked Numbers <span id="blockedCount">—</span></div></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Phone</th><th>Reason</th><th>Blocked At</th><th>Action</th></tr></thead>
+          <tbody id="blockedBody"></tbody>
+        </table></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-head"><div class="table-title">Recent Batches <span id="batchesCount">—</span></div></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Label</th><th>Type</th><th>Amount</th><th>Numbers</th><th>Sent</th><th>Failed</th><th>Interval</th><th>When</th></tr></thead>
+          <tbody id="batchesBody"></tbody>
+        </table></div>
       </div>
     </div>
 
-    <!-- ============ ADD NUMBER ============ -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-        </div>
-        <div>
-          <div class="card-title">Add Saved Number</div>
-          <div class="card-subtitle">Numbers receive STK pushes automatically</div>
+    <!-- TASKS -->
+    <div class="tab-pane" id="pane-tasks">
+      <div class="table-card">
+        <div class="table-head"><div class="table-title">Task Management</div></div>
+        <div style="padding:22px; max-width:520px;">
+          <div class="msg" id="taskMsg"></div>
+          <p style="font-size:13px; color:var(--gray-500); margin-bottom:16px; font-weight:600; line-height:1.6;">
+            Tasks are automatically refreshed every 24 hours. Force a refresh to scan for new tasks and instantly replace the existing ones.
+          </p>
+          <button class="btn btn-primary" id="refreshTasksBtn">🔄 Scan & Refresh Tasks</button>
         </div>
       </div>
-      <div class="card-body">
-        <div class="field">
-          <label for="newPhone">Phone Number</label>
-          <div class="input-wrap">
-            <span class="input-prefix">+254</span>
-            <input id="newPhone" class="has-prefix" type="tel" inputmode="numeric"
-                   placeholder="712345678" maxlength="10" />
-          </div>
-          <div class="hint">Enter 9 digits (e.g. 712345678) or full 254…</div>
-        </div>
+    </div>
 
-        <div class="row2">
-          <div class="field">
-            <label for="newAmount">Amount (KES)</label>
-            <input id="newAmount" type="number" min="1" placeholder="1" />
+    <!-- SYSTEM -->
+    <div class="tab-pane" id="pane-system">
+      <div class="table-card">
+        <div class="table-head"><div class="table-title">System Status</div></div>
+        <div style="padding:22px; max-width:520px;">
+          <div class="msg" id="sysMsg"></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:var(--gray-50); border-radius:12px; margin-bottom:16px;">
+            <div>
+              <div style="font-weight:800;">Maintenance Mode</div>
+              <div style="font-size:12px; color:var(--gray-500);">When ON, users see a maintenance page</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="maintenanceToggle">
+              <span class="slider"></span>
+            </label>
           </div>
-          <div class="field">
-            <label for="newReference">Reference</label>
-            <input id="newReference" type="text" placeholder="optional" />
-          </div>
+          <button class="btn btn-primary" id="saveMaintenanceBtn">Save Maintenance Mode</button>
         </div>
-
-        <button class="btn btn-primary" id="addNumberBtn">
-          <span class="btn-label">➕ Save Number</span>
-        </button>
       </div>
     </div>
-  </div>
 
-  <!-- ============ SAVED NUMBERS ============ -->
-  <div class="sec-header">
-    <h2>Saved Numbers <span class="count" id="numCount">0</span></h2>
-    <div style="display:flex; gap:8px;">
-      <button class="btn-refresh" id="bulkOnBtn">Activate all</button>
-      <button class="btn-refresh" id="bulkOffBtn">Deactivate all</button>
+    <!-- VISITS -->
+    <div class="tab-pane" id="pane-visits">
+      <div class="table-card">
+        <div class="table-head"><div class="table-title">Site Visits <span id="visitsCount">—</span></div></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>IP</th><th>Path</th><th>Referrer</th><th>Device</th><th>When</th></tr></thead>
+          <tbody id="visitsBody"></tbody>
+        </table></div>
+        <div class="pager"><span id="visitsPageInfo">—</span>
+          <div class="pager-btns"><button class="pager-btn" data-page-prev="visits">← Prev</button><button class="pager-btn" data-page-next="visits">Next →</button></div>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="list" id="numbersList">
-    <div class="empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="5" y="2" width="14" height="20" rx="2"/>
-        <line x1="12" y1="18" x2="12" y2="18"/>
-      </svg>
-      <p>No saved numbers yet. Add one above.</p>
-    </div>
-  </div>
 
-  <!-- ============ TRANSACTIONS ============ -->
-  <div class="sec-header">
-    <h2>Recent Transactions <span class="count" id="txCount">0</span></h2>
-    <button class="btn-refresh" id="refreshBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="23 4 23 10 17 10"/>
-        <polyline points="1 20 1 14 7 14"/>
-        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-      </svg>
-      Refresh
-    </button>
-  </div>
-  <div class="list" id="txList">
-    <div class="empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="9" y1="15" x2="15" y2="15"/>
-      </svg>
-      <p>No transactions yet.</p>
+    <!-- LOGINS -->
+    <div class="tab-pane" id="pane-logins">
+      <div class="table-card">
+        <div class="table-head">
+          <div class="table-title">Login Attempts <span id="loginsCount">—</span></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="pager-btn login-filter-btn" data-login-filter="" style="background:var(--green-light);">All</button>
+            <button class="pager-btn login-filter-btn" data-login-filter="true">✓ Success</button>
+            <button class="pager-btn login-filter-btn" data-login-filter="false">✕ Failed</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Email</th><th>Result</th><th>Reason</th><th>IP</th><th>When</th></tr></thead>
+          <tbody id="loginsBody"></tbody>
+        </table></div>
+        <div class="pager"><span id="loginsPageInfo">—</span>
+          <div class="pager-btns"><button class="pager-btn" data-page-prev="logins">← Prev</button><button class="pager-btn" data-page-next="logins">Next →</button></div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <footer>
-    PayHero Admin &middot; <span class="mpesa">M-Pesa</span> STK Automation
-  </footer>
+    <!-- PRICING -->
+    <div class="tab-pane" id="pane-settings">
+      <div class="table-card">
+        <div class="table-head"><div class="table-title">Subscription Prices</div></div>
+        <div style="padding:22px; max-width:520px;">
+          <div class="msg" id="priceMsg"></div>
+          <div class="field"><label for="priceClassic">Classic — KES / week</label><input type="number" id="priceClassic" min="1" /></div>
+          <div class="field"><label for="pricePremium">Premium — KES / week</label><input type="number" id="pricePremium" min="1" /></div>
+          <div class="field"><label for="priceGolden">Golden — KES / week</label><input type="number" id="priceGolden" min="1" /></div>
+          <button class="btn btn-primary" id="savePricesBtn">Save Prices</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
-
-<!-- ============ LOGIN OVERLAY ============ -->
-<div class="overlay" id="loginOverlay">
-  <div class="login-box">
-    <div class="login-logo">PH</div>
-    <h2>Admin Access</h2>
-    <p>Enter your admin password to continue</p>
-    <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" />
-    <button class="btn btn-primary" id="loginBtn">Unlock</button>
-    <div class="login-err" id="loginErr"></div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
 (() => {
-  'use strict';
-
   const $ = (id) => document.getElementById(id);
+  let token = sessionStorage.getItem('admin_token');
+  const state = {
+    users:   { page:1, size:50, q:'' },
+    txns:    { page:1, size:50, status:'' },
+    visits:  { page:1, size:50 },
+    logins:  { page:1, size:50, success:'' },
+    stkQuery: ''
+  };
 
-  /* ---------------- STATE ---------------- */
-  let adminKey = localStorage.getItem('ph_admin_key') || '';
-  let numbers = [];
-  let settings = {};
-  let scheduler = {};
-  let countdownTimer = null;
-
-  /* ---------------- TOAST ---------------- */
-  const toastEl = $('toast');
-  let toastTimer;
-  function toast(msg, type = '') {
-    toastEl.textContent = msg;
-    toastEl.className = 'toast show ' + type;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { toastEl.className = 'toast ' + type; }, 3200);
+  async function api(path, opts = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const res = await fetch(path, { ...opts, headers });
+    if (res.status === 401) { logout(); throw new Error('Session expired'); }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
   }
 
-  /* ---------------- API HELPER ---------------- */
-  async function api(url, options = {}) {
-    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    if (adminKey) headers['x-admin-key'] = adminKey;
-
-    const res = await fetch(url, { ...options, headers });
-    let json = {};
-    try { json = await res.json(); } catch (_) {}
-
-    if (res.status === 401) {
-      showLogin('Session expired. Please re-enter password.');
-      throw new Error('Unauthorized');
-    }
-    if (!res.ok) throw new Error(json.message || ('HTTP ' + res.status));
-    return json;
+  function fmtDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
   }
-
-  /* ---------------- LOGIN ---------------- */
-  function showLogin(msg) {
-    $('loginOverlay').classList.add('show');
-    $('loginErr').textContent = msg || '';
-    setTimeout(() => $('passwordInput').focus(), 100);
+  function timeAgo(d) {
+    if (!d) return '—';
+    const s = Math.floor((Date.now() - new Date(d)) / 1000);
+    if (s < 0) return 'soon';
+    if (s < 60) return `${s}s ago`;
+    if (s < 3600) return `${Math.floor(s/60)}m ago`;
+    if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+    return `${Math.floor(s/86400)}d ago`;
   }
-  function hideLogin() {
-    $('loginOverlay').classList.remove('show');
-    $('passwordInput').value = '';
-    $('loginErr').textContent = '';
+  function timeUntil(d) {
+    if (!d) return '—';
+    const s = Math.floor((new Date(d) - Date.now()) / 1000);
+    if (s <= 0) return 'due';
+    if (s < 60) return `${s}s`;
+    return Math.floor(s/60) + 'm';
   }
-
-  $('loginBtn').addEventListener('click', doLogin);
-  $('passwordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
-
-  async function doLogin() {
-    const pass = $('passwordInput').value.trim();
-    if (!pass) { $('loginErr').textContent = 'Enter a password'; return; }
-    adminKey = pass;
-    localStorage.setItem('ph_admin_key', pass);
-    try {
-      await api('/api/admin/status');
-      hideLogin();
-      toast('Welcome, admin', 'success');
-      loadAll();
-    } catch (err) {
-      localStorage.removeItem('ph_admin_key');
-      adminKey = '';
-      $('loginErr').textContent = 'Incorrect password';
-    }
-  }
-
-  $('lockBtn').addEventListener('click', () => {
-    localStorage.removeItem('ph_admin_key');
-    adminKey = '';
-    numbers = []; settings = {}; scheduler = {};
-    showLogin('Locked');
-  });
-
-  /* ---------------- FORMATTERS ---------------- */
+  function fmtMoney(v) { return 'KES ' + Number(v || 0).toLocaleString(); }
   function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[c]));
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
-  function fmtPhone(p) {
-    const s = String(p || '');
-    if (s.length === 12 && s.startsWith('254')) return '+254 ' + s.slice(3, 6) + ' ' + s.slice(6);
-    return s || '—';
-  }
-  function fmtTime(iso) {
-    if (!iso) return '—';
-    try { return new Date(iso).toLocaleString(); } catch (_) { return '—'; }
-  }
-  function statusBadge(status) {
-    const s = String(status || '').toLowerCase().trim();
-    let cls = 'info';
-    if (['success', 'completed'].includes(s)) cls = 'success';
-    else if (['failed', 'error', 'cancelled', 'rejected'].includes(s)) cls = 'failed';
-    else if (['pending', 'processing', 'queued', 'sent', 'accepted'].includes(s)) cls = 'pending';
-    return `<span class="badge ${cls}">${escapeHtml(status || 'unknown')}</span>`;
+  function deviceFrom(ua) {
+    if (!ua) return '—';
+    const s = ua.toLowerCase();
+    if (/iphone|ipad|ipod/.test(s)) return '📱 iOS';
+    if (/android/.test(s)) return '📱 Android';
+    if (/windows/.test(s)) return '💻 Windows';
+    if (/mac os|macintosh/.test(s)) return '💻 Mac';
+    if (/linux/.test(s)) return '💻 Linux';
+    if (/bot|crawl|spider/.test(s)) return '🤖 Bot';
+    return '🌐 Other';
   }
 
-  /* ---------------- RENDER: SETTINGS ---------------- */
-  function renderSettings() {
-    $('intervalSeconds').value = settings.intervalSeconds ?? 30;
-    $('cycleDelaySeconds').value = settings.cycleDelaySeconds ?? 60;
-    $('defaultAmount').value = settings.defaultAmount ?? 1;
-    $('defaultReference').value = settings.defaultReference ?? 'AUTO-STK';
-    $('repeat').checked = !!settings.repeat;
-
-    const on = !!settings.autoEnabled;
-    $('autoToggle').checked = on;
-    $('masterIcon').classList.toggle('on', on);
-    $('masterSub').textContent = on
-      ? 'Enabled — pushing to active numbers automatically'
-      : 'Disabled — no automatic pushes will be sent';
-  }
-
-  /* ---------------- RENDER: STATUS ---------------- */
-  function renderStatus() {
-    const running = !!scheduler.running && !!settings.autoEnabled;
-    const activeCount = numbers.filter(n => n.active).length;
-
-    $('headerDot').classList.toggle('on', running);
-    $('headerStatus').textContent = running ? 'Running' : 'Idle';
-
-    const dot = $('sbDot');
-    dot.className = 'sb-dot' + (running ? ' on' : '');
-
-    $('sbMain').textContent = running ? 'Auto-push running' : 'Auto-push idle';
-    $('sbRounds').textContent = 'Rounds: ' + (scheduler.roundCount || 0);
-    $('sbActive').textContent = 'Active numbers: ' + activeCount + ' / ' + numbers.length;
-
-    startCountdown();
-  }
-
-  function startCountdown() {
-    clearInterval(countdownTimer);
-    const tick = () => {
-      const el = $('sbNext');
-      if (!settings.autoEnabled) { el.textContent = 'Next: —'; return; }
-      if (!scheduler.nextRunAt) { el.textContent = 'Next: queued…'; return; }
-      const diff = Math.round((new Date(scheduler.nextRunAt).getTime() - Date.now()) / 1000);
-      if (diff <= 0) { el.textContent = 'Next: sending…'; return; }
-      el.textContent = 'Next push in ' + diff + 's';
-    };
-    tick();
-    countdownTimer = setInterval(tick, 1000);
-  }
-
-  /* ---------------- RENDER: NUMBERS ---------------- */
-  function renderNumbers() {
-    $('numCount').textContent = numbers.length;
-    const list = $('numbersList');
-
-    if (!numbers.length) {
-      list.innerHTML = `
-        <div class="empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="5" y="2" width="14" height="20" rx="2"/>
-            <line x1="12" y1="18" x2="12" y2="18"/>
-          </svg>
-          <p>No saved numbers yet. Add one above.</p>
-        </div>`;
-      return;
-    }
-
-    list.innerHTML = numbers.map(n => {
-      const active = !!n.active;
-      const meta = [];
-      if (n.amount) meta.push('KES ' + n.amount);
-      if (n.reference) meta.push('ref: ' + n.reference);
-      meta.push('sent ' + (n.sendCount || 0) + '×');
-      if (n.lastSentAt) meta.push('last: ' + fmtTime(n.lastSentAt));
-
-      const lastBadge = n.lastStatus
-        ? statusBadge(n.lastStatus)
-        : '<span class="badge off">never sent</span>';
-
-      const reason = (!active && n.lastReason)
-        ? `<div class="item-line2" style="color:#DC2626; margin-top:4px;">⚠ ${escapeHtml(n.lastReason)}</div>`
-        : '';
-
-      return `
-        <div class="list-item ${active ? '' : 'inactive'}">
-          <div class="avatar num ${active ? '' : 'off'}">${active ? '📲' : '⏸'}</div>
-          <div class="item-main">
-            <div class="item-line1">
-              <span class="item-phone">${escapeHtml(fmtPhone(n.phone))}</span>
-              ${active ? '<span class="badge success">active</span>' : '<span class="badge off">inactive</span>'}
-              ${lastBadge}
-            </div>
-            <div class="item-line2">${escapeHtml(meta.join(' · '))}</div>
-            ${reason}
-          </div>
-          <div class="item-actions">
-            <label class="switch small" title="${active ? 'Deactivate' : 'Activate'}">
-              <input type="checkbox" data-act="toggle" data-id="${n.id}" ${active ? 'checked' : ''} />
-              <span class="slider"></span>
-            </label>
-            <button class="btn-sm" data-act="send" data-id="${n.id}" title="Send now">Send</button>
-            <button class="btn-sm" data-act="edit" data-id="${n.id}">Edit</button>
-            <button class="btn-sm danger" data-act="del" data-id="${n.id}">✕</button>
-          </div>
-        </div>`;
-    }).join('');
-  }
-
-  /* ---------------- RENDER: TRANSACTIONS ---------------- */
-  function renderTransactions(txs) {
-    $('txCount').textContent = txs.length;
-    const list = $('txList');
-
-    if (!txs.length) {
-      list.innerHTML = `
-        <div class="empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="9" y1="15" x2="15" y2="15"/>
-          </svg>
-          <p>No transactions yet.</p>
-        </div>`;
-      return;
-    }
-
-    list.innerHTML = txs.map(tx => {
-      const isAuto = tx.source === 'auto';
-      const avatarCls = tx.type === 'CALLBACK' ? 'callback' : 'stk';
-      const label = tx.type === 'CALLBACK' ? 'CBK' : 'STK';
-      const reason = tx.reason
-        ? `<div class="item-line2" style="margin-top:4px;"><span style="color:#DC2626;font-weight:600;">⚠ ${escapeHtml(tx.reason)}</span></div>`
-        : '';
-
-      return `
-        <div class="list-item">
-          <div class="avatar ${avatarCls}">${label}</div>
-          <div class="item-main">
-            <div class="item-line1">
-              ${statusBadge(tx.status)}
-              ${isAuto ? '<span class="badge info">auto</span>' : '<span class="badge off">manual</span>'}
-            </div>
-            <div class="item-line2">
-              <span>${escapeHtml(fmtPhone(tx.phone))}</span>
-              ${tx.reference ? `<span class="ref">${escapeHtml(tx.reference)}</span>` : ''}
-              <span>${escapeHtml(fmtTime(tx.createdAt))}</span>
-            </div>
-            ${reason}
-          </div>
-          <div class="amt">${escapeHtml(String(tx.amount ?? '—'))}</div>
-        </div>`;
-    }).join('');
-  }
-
-  /* ---------------- DATA LOADING ---------------- */
-  async function loadStatus() {
-    const res = await api('/api/admin/status');
-    settings = res.data.settings || {};
-    scheduler = res.data.scheduler || {};
-    if (Array.isArray(res.data.numbers)) numbers = res.data.numbers;
-    renderSettings();
-    renderStatus();
-  }
-
-  async function loadNumbers() {
-    const res = await api('/api/admin/numbers');
-    numbers = res.data || [];
-    renderNumbers();
-    renderStatus();
-  }
-
-  async function loadTransactions() {
-    const res = await api('/api/transactions');
-    renderTransactions(res.data || []);
-  }
-
-  async function loadAll() {
+  // LOGIN
+  async function doLogin() {
+    const username = $('adminUser').value.trim();
+    const password = $('adminPass').value;
+    if (!username || !password) return showLoginMsg('Enter username and password', 'error');
+    $('loginBtn').disabled = true; $('loginBtn').textContent = 'Signing in...';
     try {
-      await Promise.all([loadStatus(), loadNumbers(), loadTransactions()]);
-    } catch (err) {
-      if (err.message !== 'Unauthorized') toast(err.message, 'error');
-    }
-  }
-
-  /* ---------------- ACTIONS ---------------- */
-  $('autoToggle').addEventListener('change', async (e) => {
-    const enabled = e.target.checked;
-    e.target.disabled = true;
-    try {
-      const res = await api('/api/admin/settings', {
-        method: 'PUT',
-        body: JSON.stringify({ autoEnabled: enabled }),
+      const res = await fetch('/api/admin/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
       });
-      settings = res.data.settings;
-      scheduler = res.data.scheduler;
-      renderSettings();
-      renderStatus();
-      toast(enabled ? '🚀 Auto STK push ENABLED' : '⏹ Auto STK push DISABLED', enabled ? 'success' : '');
-    } catch (err) {
-      toast(err.message, 'error');
-      e.target.checked = !enabled;
-    } finally {
-      e.target.disabled = false;
-    }
-  });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed');
+      token = data.token;
+      sessionStorage.setItem('admin_token', token);
+      enterApp();
+    } catch (err) { showLoginMsg(err.message, 'error'); }
+    finally { $('loginBtn').disabled = false; $('loginBtn').textContent = 'Sign In'; }
+  }
+  function showLoginMsg(text, type) {
+    const el = $('loginMsg');
+    el.textContent = text; el.className = 'msg show ' + type;
+    setTimeout(() => el.classList.remove('show'), 4000);
+  }
+  $('loginBtn').addEventListener('click', doLogin);
+  $('adminPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  $('adminUser').addEventListener('keydown', e => { if (e.key === 'Enter') $('adminPass').focus(); });
 
-  $('saveSettingsBtn').addEventListener('click', async () => {
-    const btn = $('saveSettingsBtn');
-    btn.disabled = true;
+  function logout() {
+    token = null; sessionStorage.removeItem('admin_token');
+    $('layout').classList.remove('show');
+    $('loginWrap').style.display = 'flex';
+  }
+  $('logoutBtn').addEventListener('click', () => { if (confirm('Logout?')) logout(); });
+
+  function enterApp() {
+    $('loginWrap').style.display = 'none';
+    $('layout').classList.add('show');
+    loadStats(); loadUsers(); loadSubs(); loadTxns(); loadPending();
+    loadWithdrawals(); loadVisits(); loadLogins(); loadPrices();
+    loadMaintenance(); loadStkConfig(); loadStkRetries(); loadBatches();
+  }
+
+  // STATS
+  async function loadStats() {
     try {
-      const res = await api('/api/admin/settings', {
-        method: 'PUT',
-        body: JSON.stringify({
-          intervalSeconds: Number($('intervalSeconds').value),
-          cycleDelaySeconds: Number($('cycleDelaySeconds').value),
-          defaultAmount: Number($('defaultAmount').value),
-          defaultReference: $('defaultReference').value.trim(),
-          repeat: $('repeat').checked,
-        }),
-      });
-      settings = res.data.settings;
-      scheduler = res.data.scheduler;
-      renderSettings();
-      renderStatus();
-      toast('Settings saved', 'success');
-    } catch (err) {
-      toast(err.message, 'error');
-    } finally {
-      btn.disabled = false;
-    }
-  });
+      const s = await api('/api/admin/stats');
+      const cards = [
+        { cls:'', ic:'👥', lbl:'Total Users', val: s.users.total.toLocaleString(), sub:`+${s.users.today} today · +${s.users.week} this week` },
+        { cls:'gold', ic:'💰', lbl:'Total Revenue', val: fmtMoney(s.revenue.total), sub:`+${fmtMoney(s.revenue.today)} today` },
+        { cls:'', ic:'⭐', lbl:'Active Subs', val: s.subscriptions.active, sub:`${s.subscriptions.classic}C · ${s.subscriptions.premium}P · ${s.subscriptions.golden}G` },
+        { cls:'red', ic:'✕', lbl:'Failed Payments', val: s.transactions.failed, sub:`${s.transactions.pending} pending` },
+        { cls:'', ic:'✓', lbl:'Successful', val: s.transactions.completed, sub:`${s.transactions.total} total` },
+        { cls:'purple', ic:'🔓', lbl:'Activations', val: s.pending.activations || 0, sub:`${fmtMoney(s.revenue.activations||0)} collected` },
+        { cls:'yellow', ic:'⏳', lbl:'Pending Rewards', val: s.pending.rewards, sub:`${fmtMoney(s.pending.rewardsAmount)} awaiting` },
+        { cls:'purple', ic:'💸', lbl:'Pending Withdrawals', val: s.pending.withdrawals, sub:'awaiting payout' },
+        { cls:'blue', ic:'📡', lbl:'Active STK Retries', val: s.stk?.activeRetries || 0, sub:`${s.stk?.blockedNumbers || 0} blocked numbers` },
+        { cls:'blue', ic:'👀', lbl:'Site Visits', val: s.visits.total.toLocaleString(), sub:`${s.visits.today} today · ${s.visits.uniqueToday} unique` },
+        { cls:'purple', ic:'🔐', lbl:'Logins', val: s.logins.success, sub:`${s.logins.failed} failed` },
+        { cls:'', ic:'📋', lbl:'Tasks Completed', val: s.tasksCompleted.toLocaleString(), sub:'all-time' }
+      ];
+      $('statsGrid').innerHTML = cards.map(c => `
+        <div class="stat-card ${c.cls}">
+          <div class="stat-ic">${c.ic}</div>
+          <div class="stat-lbl">${c.lbl}</div>
+          <div class="stat-val">${c.val}</div>
+          <div class="stat-sub">${c.sub}</div>
+        </div>`).join('');
+    } catch (err) { console.error(err); }
+  }
 
-  $('newPhone').addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 12);
-    if (e.target.value.startsWith('0')) e.target.value = e.target.value.slice(1);
-  });
-
-  $('addNumberBtn').addEventListener('click', async () => {
-    const phone = $('newPhone').value.trim();
-    const amount = $('newAmount').value.trim();
-    const reference = $('newReference').value.trim();
-
-    if (phone.length < 9) { toast('Enter a valid phone number', 'error'); return; }
-
-    const btn = $('addNumberBtn');
-    btn.disabled = true;
+  // USERS
+  async function loadUsers() {
     try {
-      await api('/api/admin/numbers', {
-        method: 'POST',
-        body: JSON.stringify({
-          phone,
-          amount: amount ? Number(amount) : undefined,
-          reference: reference || undefined,
-        }),
-      });
-      $('newPhone').value = '';
-      $('newAmount').value = '';
-      $('newReference').value = '';
-      toast('Number saved', 'success');
-      await loadNumbers();
-    } catch (err) {
-      toast(err.message, 'error');
-    } finally {
-      btn.disabled = false;
-    }
-  });
+      const { page, size, q } = state.users;
+      const data = await api(`/api/admin/users?page=${page}&size=${size}&q=${encodeURIComponent(q)}`);
+      $('usersCount').textContent = `(${data.total.toLocaleString()})`;
+      $('usersBody').innerHTML = data.users.length
+        ? data.users.map(u => `
+          <tr>
+            <td><strong>${escapeHtml(u.username)}</strong></td>
+            <td class="truncate">${escapeHtml(u.email)}</td>
+            <td class="mono">${escapeHtml(u.phone || '—')}</td>
+            <td><span class="sub-badge ${u.subscriptionTier}">${u.subscriptionTier}</span>
+                ${u.subscriptionActive ? ' <span class="pill green">Active</span>' : ''}</td>
+            <td>${u.activationFeePaid ? '<span class="pill green">✓ Paid</span>' : '<span class="pill red">✗ Not paid</span>'}</td>
+            <td><strong>${fmtMoney(u.balance)}</strong></td>
+            <td style="color:#D4901A;font-weight:800;">${fmtMoney(u.pendingBalance || 0)}</td>
+            <td style="color:var(--green);font-weight:800;">${fmtMoney(u.totalEarnings)}</td>
+            <td title="${u.lastLoginIp || ''}">${u.lastLoginAt ? timeAgo(u.lastLoginAt) : '—'}</td>
+            <td>${timeAgo(u.createdAt)}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="10"><div class="empty"><div class="empty-ic">👥</div>No users</div></td></tr>`;
+      const totalPages = Math.ceil(data.total / size) || 1;
+      $('usersPageInfo').textContent = `Page ${page} of ${totalPages}`;
+      document.querySelector('[data-page-prev="users"]').disabled = page <= 1;
+      document.querySelector('[data-page-next="users"]').disabled = page >= totalPages;
+    } catch (err) { console.error(err); }
+  }
 
-  $('numbersList').addEventListener('click', async (e) => {
-    const btn = e.target.closest('[data-act]');
-    if (!btn) return;
-    const id = btn.dataset.id;
-    const act = btn.dataset.act;
-    const num = numbers.find(n => n.id === id);
-    if (!num) return;
-
+  // SUBS
+  async function loadSubs() {
     try {
-      if (act === 'send') {
-        btn.disabled = true;
-        btn.textContent = '…';
-        const res = await api(`/api/admin/numbers/${id}/send`, { method: 'POST' });
-        toast(res.status ? '✅ STK push sent' : '❌ Push failed', res.status ? 'success' : 'error');
-        await Promise.all([loadNumbers(), loadTransactions()]);
-      } else if (act === 'edit') {
-        const newAmount = prompt('Amount (KES):', num.amount || settings.defaultAmount || 1);
-        if (newAmount === null) return;
-        const newRef = prompt('Reference (optional):', num.reference || '');
-        if (newRef === null) return;
-        await api(`/api/admin/numbers/${id}`, {
-          method: 'PUT',
-          body: JSON.stringify({ amount: Number(newAmount), reference: newRef.trim() }),
+      const subs = await api('/api/admin/subscriptions');
+      $('subsCount').textContent = `(${subs.length})`;
+      $('subsBody').innerHTML = subs.length
+        ? subs.map(s => `
+          <tr>
+            <td><strong>${escapeHtml(s.username)}</strong></td>
+            <td class="truncate">${escapeHtml(s.email)}</td>
+            <td class="mono">${escapeHtml(s.phone || '—')}</td>
+            <td><span class="sub-badge ${s.tier}">${s.tier}</span></td>
+            <td>${fmtDate(s.expiry)}</td>
+            <td><strong style="color:${s.daysLeft <= 2 ? 'var(--red)' : 'var(--green)'};">${s.daysLeft}d</strong></td>
+          </tr>`).join('')
+        : `<tr><td colspan="6"><div class="empty"><div class="empty-ic">⭐</div>No active subscriptions</div></td></tr>`;
+    } catch (err) { console.error(err); }
+  }
+
+  // TXNS
+  async function loadTxns() {
+    try {
+      const { page, size, status } = state.txns;
+      const data = await api(`/api/admin/transactions?page=${page}&size=${size}&status=${status}`);
+      $('txnsCount').textContent = `(${data.total.toLocaleString()})`;
+      $('txnsBody').innerHTML = data.transactions.length
+        ? data.transactions.map(t => {
+            const statusPill = { completed:'green', failed:'red', pending:'yellow' }[t.status] || 'gray';
+            const kindLabel = t.kind === 'deposit' ? '💳 Deposit'
+              : t.kind === 'activation' ? '🔓 Activation'
+              : t.kind === 'custom' ? '📡 Custom'
+              : `⭐ ${t.tier || 'sub'}`;
+            const canMarkPaid = (t.status === 'failed' || t.status === 'pending');
+            const actionCell = canMarkPaid
+              ? `<button class="pager-btn mark-paid-btn" data-id="${t.id}" style="background:var(--green);color:white;border-color:var(--green);padding:5px 10px;font-size:11px;">✓ Mark Paid</button>`
+              : `<span style="color:var(--gray-500);font-size:11px;">—</span>`;
+            const retryCell = t.autoRetry
+              ? `<span class="pill ${t.retryActive ? 'blue' : 'gray'}">↻ ${t.retryCount}${t.retryActive ? ' active' : ''}</span>`
+              : `<span style="color:var(--gray-500);font-size:11px;">—</span>`;
+            return `
+              <tr>
+                <td><strong>${escapeHtml(t.user?.username || '—')}</strong><br>
+                    <span class="mono" style="color:var(--gray-500);font-size:10px;">${escapeHtml(t.user?.email || '')}</span></td>
+                <td>${kindLabel}</td>
+                <td><strong>${fmtMoney(t.amount)}</strong></td>
+                <td class="mono">${escapeHtml(t.phone || '—')}</td>
+                <td><span class="pill ${statusPill}">${t.status}</span></td>
+                <td>${retryCell}</td>
+                <td class="mono">${escapeHtml(t.mpesaRef || '—')}</td>
+                <td>${timeAgo(t.completedAt || t.createdAt)}</td>
+                <td>${actionCell}</td>
+              </tr>`;
+          }).join('')
+        : `<tr><td colspan="9"><div class="empty"><div class="empty-ic">💳</div>No transactions</div></td></tr>`;
+
+      document.querySelectorAll('.mark-paid-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Mark this transaction as PAID?')) return;
+          btn.disabled = true; btn.textContent = '...';
+          try {
+            await api(`/api/admin/transactions/${btn.dataset.id}/mark-paid`, { method: 'POST' });
+            loadTxns(); loadStats();
+          } catch (e) { alert(e.message); btn.disabled = false; btn.textContent = '✓ Mark Paid'; }
         });
-        toast('Number updated', 'success');
-        await loadNumbers();
-      } else if (act === 'del') {
-        if (!confirm('Delete ' + fmtPhone(num.phone) + '?')) return;
-        await api(`/api/admin/numbers/${id}`, { method: 'DELETE' });
-        toast('Number deleted', 'success');
-        await loadNumbers();
-      }
-    } catch (err) {
-      toast(err.message, 'error');
-      btn.disabled = false;
-      btn.textContent = 'Send';
-    }
-  });
-
-  // Toggle active / inactive (checkbox inside the switch)
-  $('numbersList').addEventListener('change', async (e) => {
-    const cb = e.target.closest('input[data-act="toggle"]');
-    if (!cb) return;
-    const id = cb.dataset.id;
-    cb.disabled = true;
-    try {
-      await api(`/api/admin/numbers/${id}/toggle`, { method: 'PATCH' });
-      const num = numbers.find(n => n.id === id);
-      toast(num && num.active ? 'Deactivated — no STK will be sent' : 'Activated — STK will be sent',
-            num && num.active ? '' : 'success');
-      await loadNumbers();
-    } catch (err) {
-      toast(err.message, 'error');
-      cb.checked = !cb.checked;
-    } finally {
-      cb.disabled = false;
-    }
-  });
-
-  $('bulkOnBtn').addEventListener('click', async () => {
-    if (!confirm('Activate ALL saved numbers?')) return;
-    try {
-      await api('/api/admin/numbers/bulk', {
-        method: 'PATCH',
-        body: JSON.stringify({ active: true }),
       });
-      toast('All numbers activated', 'success');
-      await loadNumbers();
-    } catch (err) { toast(err.message, 'error'); }
-  });
-
-  $('bulkOffBtn').addEventListener('click', async () => {
-    if (!confirm('Deactivate ALL saved numbers? No STK will be sent.')) return;
-    try {
-      await api('/api/admin/numbers/bulk', {
-        method: 'PATCH',
-        body: JSON.stringify({ active: false }),
-      });
-      toast('All numbers deactivated');
-      await loadNumbers();
-    } catch (err) { toast(err.message, 'error'); }
-  });
-
-  $('refreshBtn').addEventListener('click', async () => {
-    const b = $('refreshBtn');
-    b.classList.add('spinning');
-    try { await loadAll(); } finally { setTimeout(() => b.classList.remove('spinning'), 400); }
-  });
-
-  /* ---------------- BOOT ---------------- */
-  async function boot() {
-    try {
-      await api('/api/admin/status');
-      hideLogin();
-      await loadAll();
-    } catch (err) {
-      if (err.message === 'Unauthorized') showLogin();
-      else { hideLogin(); toast(err.message, 'error'); }
-    }
+      const totalPages = Math.ceil(data.total / size) || 1;
+      $('txnsPageInfo').textContent = `Page ${page} of ${totalPages}`;
+      document.querySelector('[data-page-prev="txns"]').disabled = page <= 1;
+      document.querySelector('[data-page-next="txns"]').disabled = page >= totalPages;
+    } catch (err) { console.error(err); }
   }
 
-  // Poll every 4 seconds to keep scheduler status live
-  setInterval(() => {
-    if (!adminKey) return;
-    api('/api/admin/status').then(res => {
-      settings = res.data.settings || {};
-      scheduler = res.data.scheduler || {};
-      if (Array.isArray(res.data.numbers)) numbers = res.data.numbers;
-      renderSettings();
-      renderNumbers();
-      renderStatus();
-    }).catch(() => {});
-  }, 4000);
+  // PENDING
+  async function loadPending() {
+    try {
+      const data = await api('/api/admin/pending-rewards');
+      $('pendingCount').textContent = `(${data.total})`;
+      $('pendingTotal').textContent = `KES ${data.totalAmount.toLocaleString()}`;
+      $('pendingBody').innerHTML = data.items.length
+        ? data.items.map(t => `
+          <tr>
+            <td><strong>${escapeHtml(t.user.username)}</strong><br>
+                <span class="mono" style="color:var(--gray-500);font-size:10px;">${escapeHtml(t.user.email)}</span></td>
+            <td class="truncate" title="${escapeHtml(t.taskTitle)}">${escapeHtml(t.taskTitle)}</td>
+            <td>${t.owner?.avatar || '📋'} ${escapeHtml(t.owner?.name || '—')}</td>
+            <td>${t.answersCount || '—'}</td>
+            <td><strong>${fmtMoney(t.amount)}</strong></td>
+            <td>${timeAgo(t.createdAt)}</td>
+            <td>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="pager-btn confirm-btn" data-id="${t.id}" style="background:var(--green);color:white;border-color:var(--green);">✓ Confirm</button>
+                <button class="pager-btn reject-btn" data-id="${t.id}" style="background:var(--red);color:white;border-color:var(--red);">✕ Reject</button>
+              </div>
+            </td>
+          </tr>`).join('')
+        : `<tr><td colspan="7"><div class="empty"><div class="empty-ic">⏳</div>No pending rewards</div></td></tr>`;
 
-  setInterval(() => {
-    if (!adminKey) return;
-    loadTransactions().catch(() => {});
-  }, 7000);
+      $('pendingBody').querySelectorAll('.confirm-btn').forEach(b => {
+        b.addEventListener('click', async () => {
+          b.disabled = true; b.textContent = '...';
+          try { await api(`/api/admin/wallet/confirm/${b.dataset.id}`, { method:'POST' }); loadPending(); loadStats(); }
+          catch (e) { alert(e.message); b.disabled = false; b.textContent = '✓ Confirm'; }
+        });
+      });
+      $('pendingBody').querySelectorAll('.reject-btn').forEach(b => {
+        b.addEventListener('click', async () => {
+          const reason = prompt('Reason?', 'Invalid answers') || 'Rejected';
+          b.disabled = true; b.textContent = '...';
+          try { await api(`/api/admin/wallet/reject/${b.dataset.id}`, { method:'POST', body: JSON.stringify({ reason }) }); loadPending(); loadStats(); }
+          catch (e) { alert(e.message); b.disabled = false; b.textContent = '✕ Reject'; }
+        });
+      });
+    } catch (err) { console.error(err); }
+  }
 
-  boot();
+  $('confirmAllBtn').addEventListener('click', async () => {
+    if (!confirm('Confirm ALL pending rewards?')) return;
+    try { const r = await api('/api/admin/wallet/confirm-all', { method:'POST' }); alert(`✓ Confirmed ${r.count}`); loadPending(); loadStats(); }
+    catch (err) { alert(err.message); }
+  });
+
+  // WITHDRAWALS
+  async function loadWithdrawals() {
+    try {
+      const data = await api('/api/admin/pending-withdrawals');
+      $('wdrCount').textContent = `(${data.total})`;
+      $('wdrTotal').textContent = `KES ${data.totalAmount.toLocaleString()}`;
+      $('wdrBody').innerHTML = data.items.length
+        ? data.items.map(t => `
+          <tr>
+            <td><strong>${escapeHtml(t.user.username)}</strong><br>
+                <span class="mono" style="color:var(--gray-500);font-size:10px;">${escapeHtml(t.user.email)}</span></td>
+            <td class="mono">${escapeHtml(t.phone || '—')}</td>
+            <td><strong>${fmtMoney(t.amount)}</strong></td>
+            <td>${timeAgo(t.createdAt)}</td>
+            <td>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="pager-btn wconf-btn" data-id="${t.id}" style="background:var(--green);color:white;border-color:var(--green);">✓ Mark Paid</button>
+                <button class="pager-btn wrej-btn" data-id="${t.id}" style="background:var(--red);color:white;border-color:var(--red);">✕ Refund</button>
+              </div>
+            </td>
+          </tr>`).join('')
+        : `<tr><td colspan="5"><div class="empty"><div class="empty-ic">💸</div>No pending withdrawals</div></td></tr>`;
+
+      $('wdrBody').querySelectorAll('.wconf-btn').forEach(b => {
+        b.addEventListener('click', async () => {
+          if (!confirm('Mark this withdrawal as PAID?')) return;
+          b.disabled = true; b.textContent = '...';
+          try { await api(`/api/admin/withdrawal/confirm/${b.dataset.id}`, { method:'POST' }); loadWithdrawals(); loadStats(); }
+          catch (e) { alert(e.message); b.disabled = false; b.textContent = '✓ Mark Paid'; }
+        });
+      });
+      $('wdrBody').querySelectorAll('.wrej-btn').forEach(b => {
+        b.addEventListener('click', async () => {
+          const reason = prompt('Reason?', 'Rejected') || 'Rejected';
+          b.disabled = true; b.textContent = '...';
+          try { await api(`/api/admin/withdrawal/reject/${b.dataset.id}`, { method:'POST', body: JSON.stringify({ reason }) }); loadWithdrawals(); loadStats(); }
+          catch (e) { alert(e.message); b.disabled = false; b.textContent = '✕ Refund'; }
+        });
+      });
+    } catch (err) { console.error(err); }
+  }
+
+  // STK CONTROL
+  async function loadStkConfig() {
+    try {
+      const c = await api('/api/admin/stk-config');
+      $('stkInterval').value = c.retryIntervalMinutes;
+      $('batchInterval').placeholder = `default: ${c.retryIntervalMinutes}`;
+    } catch (err) { console.error(err); }
+  }
+
+  $('saveStkIntervalBtn').addEventListener('click', async () => {
+    const mins = Number($('stkInterval').value);
+    const msg = $('stkCfgMsg');
+    try {
+      await api('/api/admin/stk-config', { method: 'PUT', body: JSON.stringify({ retryIntervalMinutes: mins }) });
+      msg.textContent = `✓ Retry interval set to ${mins} minute(s)`;
+      msg.className = 'msg show success';
+      setTimeout(() => msg.classList.remove('show'), 2500);
+      loadStkConfig();
+    } catch (err) { msg.textContent = err.message; msg.className = 'msg show error'; }
+  });
+
+  async function loadStkRetries() {
+    try {
+      const q = state.stkQuery;
+      const data = await api('/api/admin/stk-retries' + (q ? `?q=${encodeURIComponent(q)}` : ''));
+      $('stkActiveCount').textContent = `(${data.totalActive} across ${data.numbers} numbers)`;
+
+      $('stkGroupedBody').innerHTML = data.grouped.length
+        ? data.grouped.map(g => `
+          <tr>
+            <td class="mono"><strong>${escapeHtml(g.phone)}</strong></td>
+            <td>${g.count}</td>
+            <td><strong>${fmtMoney(g.amount)}</strong></td>
+            <td>${g.kinds.map(k => `<span class="pill blue">${escapeHtml(k)}</span>`).join(' ')}</td>
+            <td>${g.maxRetries}</td>
+            <td><strong>${timeUntil(g.nextRetryAt)}</strong></td>
+            <td>${timeAgo(g.lastStkAt)}</td>
+            <td>${g.errors ? `<span class="pill red">${g.errors}</span>` : '—'}</td>
+            <td>
+              <button class="pager-btn stop-num-btn" data-phone="${escapeHtml(g.phone)}" style="background:var(--red);color:white;border-color:var(--red);">⏹ Stop</button>
+            </td>
+          </tr>`).join('')
+        : `<tr><td colspan="9"><div class="empty"><div class="empty-ic">📡</div>No active recurring STK</div></td></tr>`;
+
+      $('stkItemsBody').innerHTML = data.items.length
+        ? data.items.slice(0, 100).map(t => `
+          <tr>
+            <td class="mono truncate" title="${escapeHtml(t.reference)}">${escapeHtml(t.reference)}</td>
+            <td>${escapeHtml(t.user?.username || '—')}</td>
+            <td class="mono">${escapeHtml(t.phone)}</td>
+            <td>${escapeHtml(t.kind)}</td>
+            <td><strong>${fmtMoney(t.amount)}</strong></td>
+            <td>${t.retryCount}</td>
+            <td>${Math.round((t.intervalMs || 0)/60000)}m</td>
+            <td><strong>${timeUntil(t.nextRetryAt)}</strong></td>
+            <td>${t.lastStkOk
+              ? '<span class="pill green">✓ Sent</span>'
+              : `<span class="pill red" title="${escapeHtml(t.lastStkError || '')}">✕ Error</span>`}</td>
+            <td>
+              <div style="display:flex;gap:4px;">
+                <button class="pager-btn stop-one-btn" data-id="${t.id}" style="background:var(--red);color:white;border-color:var(--red);padding:4px 8px;font-size:11px;">⏹</button>
+              </div>
+            </td>
+          </tr>`).join('')
+        : `<tr><td colspan="10"><div class="empty"><div class="empty-ic">📡</div>No active retries</div></td></tr>`;
+
+      $('blockedCount').textContent = `(${data.blocked.length})`;
+      $('blockedBody').innerHTML = data.blocked.length
+        ? data.blocked.map(b => `
+          <tr>
+            <td class="mono"><strong>${escapeHtml(b.phone)}</strong></td>
+            <td>${escapeHtml(b.reason || '—')}</td>
+            <td>${timeAgo(b.blockedAt)}</td>
+            <td><button class="pager-btn unblock-btn" data-phone="${escapeHtml(b.phone)}" style="background:var(--green);color:white;border-color:var(--green);">🔓 Unblock</button></td>
+          </tr>`).join('')
+        : `<tr><td colspan="4"><div class="empty">No blocked numbers</div></td></tr>`;
+
+      $('stkGroupedBody').querySelectorAll('.stop-num-btn').forEach(b => {
+        b.addEventListener('click', async () => {
+          const phone = b.dataset.phone;
+          const block = confirm(`Stop all recurring STK for ${phone}?\n\nOK = also block future STK to this number.\nCancel = just stop current retries.`);
+          try {
+            const r = await api('/api/admin/stk-retries/stop-number', {
+              method: 'POST',
+              body: JSON.stringify({ phone, block, reason: 'Stopped by admin' })
+            });
+            alert(`✓ Stopped ${r.stopped} retries${r.blocked ? ' · number blocked' : ''}`);
+            loadStkRetries(); loadStats();
+          } catch (e) { alert(e.message); }
+        });
+      });
+
+      $('stkItemsBody').querySelectorAll('.stop-one-btn').forEach(b => {
+        b.addEventListener('click', async () => {
+          if (!confirm('Stop this recurring STK?')) return;
+          try {
+            await api(`/api/admin/stk-retries/stop/${b.dataset.id}`, { method: 'POST' });
+            loadStkRetries(); loadStats();
+          } catch (e) { alert(e.message); }
+        });
+      });
+
+      $('blockedBody').querySelectorAll('.unblock-btn').forEach(b => {
+        b.addEventListener('click', async () => {
+          try {
+            await api('/api/admin/stk-retries/unblock', { method: 'POST', body: JSON.stringify({ phone: b.dataset.phone }) });
+            loadStkRetries();
+          } catch (e) { alert(e.message); }
+        });
+      });
+    } catch (err) { console.error(err); }
+  }
+
+  $('stopAllStkBtn').addEventListener('click', async () => {
+    if (!confirm('Stop ALL active recurring STK retries?')) return;
+    try {
+      const r = await api('/api/admin/stk-retries/stop-all', { method: 'POST' });
+      alert(`✓ Stopped ${r.stopped} retries`);
+      loadStkRetries(); loadStats();
+    } catch (e) { alert(e.message); }
+  });
+
+  let stkSearchTimer;
+  $('stkSearch').addEventListener('input', (e) => {
+    clearTimeout(stkSearchTimer);
+    stkSearchTimer = setTimeout(() => {
+      state.stkQuery = e.target.value.trim();
+      loadStkRetries();
+    }, 400);
+  });
+
+  $('sendBatchBtn').addEventListener('click', async () => {
+    const numbers = $('batchNumbers').value;
+    const amount = Number($('batchAmount').value);
+    const kind = $('batchKind').value;
+    const tier = $('batchTier').value || undefined;
+    const intervalMinutes = Number($('batchInterval').value) || undefined;
+    const autoRetry = $('batchAutoRetry').checked;
+    const label = $('batchLabel').value.trim() || undefined;
+
+    const msg = $('batchMsg');
+    if (!numbers.trim()) { msg.textContent = 'Paste at least one phone number'; msg.className = 'msg show error'; return; }
+    if (!confirm(`Send STK of KES ${amount} to all listed numbers?`)) return;
+
+    const btn = $('sendBatchBtn');
+    btn.disabled = true; btn.textContent = 'Sending...';
+    try {
+      const res = await api('/api/admin/stk-batch', {
+        method: 'POST',
+        body: JSON.stringify({ numbers, amount, kind, tier, intervalMinutes, autoRetry, label })
+      });
+      msg.textContent = `✓ Batch sent — ${res.sent} delivered, ${res.failed} failed of ${res.total}`;
+      msg.className = 'msg show success';
+      $('batchNumbers').value = '';
+      loadBatches(); loadStkRetries(); loadStats();
+    } catch (err) { msg.textContent = err.message; msg.className = 'msg show error'; }
+    finally { btn.disabled = false; btn.textContent = '📤 Send STK to All'; }
+  });
+
+  async function loadBatches() {
+    try {
+      const items = await api('/api/admin/stk-batches');
+      $('batchesCount').textContent = `(${items.length})`;
+      $('batchesBody').innerHTML = items.length
+        ? items.map(b => `
+          <tr>
+            <td>${escapeHtml(b.label || '—')}</td>
+            <td><span class="pill blue">${b.kind}${b.tier ? ' / ' + b.tier : ''}</span></td>
+            <td><strong>${fmtMoney(b.amount)}</strong></td>
+            <td>${b.total}</td>
+            <td><span class="pill green">${b.sent}</span></td>
+            <td><span class="pill ${b.failed ? 'red' : 'gray'}">${b.failed}</span></td>
+            <td>${b.intervalMinutes}m ${b.autoRetry ? '↻' : ''}</td>
+            <td>${timeAgo(b.createdAt)}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="8"><div class="empty"><div class="empty-ic">📡</div>No batches yet</div></td></tr>`;
+    } catch (err) { console.error(err); }
+  }
+
+  // TASKS
+  $('refreshTasksBtn').addEventListener('click', async () => {
+    if (!confirm('Refresh all tasks?')) return;
+    const btn = $('refreshTasksBtn');
+    btn.disabled = true; btn.textContent = 'Scanning...';
+    try {
+      const res = await api('/api/admin/tasks/refresh', { method: 'POST' });
+      const msg = $('taskMsg');
+      msg.textContent = '✓ ' + (res.message || 'Refreshed');
+      msg.className = 'msg show success';
+      setTimeout(() => msg.classList.remove('show'), 3000);
+      loadStats();
+    } catch (err) { const msg = $('taskMsg'); msg.textContent = err.message; msg.className = 'msg show error'; }
+    finally { btn.disabled = false; btn.textContent = '🔄 Scan & Refresh Tasks'; }
+  });
+
+  // SYSTEM
+  async function loadMaintenance() {
+    try { const res = await api('/api/admin/settings/maintenance'); $('maintenanceToggle').checked = res.enabled; }
+    catch (err) { console.error(err); }
+  }
+  $('saveMaintenanceBtn').addEventListener('click', async () => {
+    const enabled = $('maintenanceToggle').checked;
+    const btn = $('saveMaintenanceBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    try {
+      await api('/api/admin/settings/maintenance', { method: 'PUT', body: JSON.stringify({ enabled }) });
+      const msg = $('sysMsg'); msg.textContent = `✓ Maintenance is ${enabled ? 'ON' : 'OFF'}`; msg.className = 'msg show success';
+      setTimeout(() => msg.classList.remove('show'), 3000);
+    } catch (err) { const msg = $('sysMsg'); msg.textContent = err.message; msg.className = 'msg show error'; }
+    finally { btn.disabled = false; btn.textContent = 'Save Maintenance Mode'; }
+  });
+
+  // VISITS
+  async function loadVisits() {
+    try {
+      const { page, size } = state.visits;
+      const data = await api(`/api/admin/visits?page=${page}&size=${size}`);
+      $('visitsCount').textContent = `(${data.total.toLocaleString()})`;
+      $('visitsBody').innerHTML = data.visits.length
+        ? data.visits.map(v => `
+          <tr>
+            <td class="mono">${escapeHtml(v.ip || 'unknown')}</td>
+            <td class="mono truncate">${escapeHtml(v.path || '/')}</td>
+            <td class="truncate">${escapeHtml(v.referrer || '—')}</td>
+            <td>${deviceFrom(v.ua)}</td>
+            <td>${timeAgo(v.createdAt)}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="5"><div class="empty"><div class="empty-ic">👀</div>No visits</div></td></tr>`;
+      const totalPages = Math.ceil(data.total / size) || 1;
+      $('visitsPageInfo').textContent = `Page ${page} of ${totalPages}`;
+      document.querySelector('[data-page-prev="visits"]').disabled = page <= 1;
+      document.querySelector('[data-page-next="visits"]').disabled = page >= totalPages;
+    } catch (err) { console.error(err); }
+  }
+
+  // LOGINS
+  async function loadLogins() {
+    try {
+      const { page, size, success } = state.logins;
+      const data = await api(`/api/admin/login-attempts?page=${page}&size=${size}&success=${success}`);
+      $('loginsCount').textContent = `(${data.total.toLocaleString()})`;
+      $('loginsBody').innerHTML = data.attempts.length
+        ? data.attempts.map(a => `
+          <tr>
+            <td class="truncate">${escapeHtml(a.email || '—')}</td>
+            <td><span class="pill ${a.success ? 'green' : 'red'}">${a.success ? '✓ Success' : '✕ Failed'}</span></td>
+            <td>${escapeHtml(a.reason || '—')}</td>
+            <td class="mono">${escapeHtml(a.ip || '—')}</td>
+            <td>${timeAgo(a.createdAt)}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="5"><div class="empty"><div class="empty-ic">🔐</div>No login attempts</div></td></tr>`;
+      const totalPages = Math.ceil(data.total / size) || 1;
+      $('loginsPageInfo').textContent = `Page ${page} of ${totalPages}`;
+      document.querySelector('[data-page-prev="logins"]').disabled = page <= 1;
+      document.querySelector('[data-page-next="logins"]').disabled = page >= totalPages;
+    } catch (err) { console.error(err); }
+  }
+
+  // PRICES
+  async function loadPrices() {
+    try {
+      const p = await api('/api/admin/settings/prices');
+      $('priceClassic').value = p.classic;
+      $('pricePremium').value = p.premium;
+      $('priceGolden').value  = p.golden;
+    } catch (err) { console.error(err); }
+  }
+  $('savePricesBtn').addEventListener('click', async () => {
+    const classic = Number($('priceClassic').value);
+    const premium = Number($('pricePremium').value);
+    const golden  = Number($('priceGolden').value);
+    const msg = $('priceMsg');
+    if ([classic, premium, golden].some(v => !Number.isFinite(v) || v < 1)) {
+      msg.textContent = 'Enter valid positive numbers'; msg.className = 'msg show error'; return;
+    }
+    const btn = $('savePricesBtn'); btn.disabled = true; btn.textContent = 'Saving...';
+    try {
+      await api('/api/admin/settings/prices', { method: 'PUT', body: JSON.stringify({ classic, premium, golden }) });
+      msg.textContent = '✓ Prices saved'; msg.className = 'msg show success';
+      setTimeout(() => msg.classList.remove('show'), 2500);
+      loadStats();
+    } catch (err) { msg.textContent = err.message; msg.className = 'msg show error'; }
+    finally { btn.disabled = false; btn.textContent = 'Save Prices'; }
+  });
+
+  // TABS
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      $('pane-' + t.dataset.tab).classList.add('active');
+      const tab = t.dataset.tab;
+      if (tab === 'users') loadUsers();
+      if (tab === 'subs') loadSubs();
+      if (tab === 'txns') loadTxns();
+      if (tab === 'pending') loadPending();
+      if (tab === 'withdrawals') loadWithdrawals();
+      if (tab === 'stk') { loadStkConfig(); loadStkRetries(); loadBatches(); }
+      if (tab === 'system') loadMaintenance();
+      if (tab === 'visits') loadVisits();
+      if (tab === 'logins') loadLogins();
+      if (tab === 'settings') loadPrices();
+    });
+  });
+
+  // PAGER
+  document.querySelectorAll('.pager-btn').forEach(btn => {
+    if (!btn.dataset.pagePrev && !btn.dataset.pageNext) return;
+    btn.addEventListener('click', () => {
+      const prev = btn.dataset.pagePrev;
+      const next = btn.dataset.pageNext;
+      if (prev && state[prev]) { state[prev].page = Math.max(1, state[prev].page - 1); reload(prev); }
+      if (next && state[next]) { state[next].page++; reload(next); }
+    });
+  });
+  function reload(kind) {
+    if (kind === 'users') loadUsers();
+    if (kind === 'txns') loadTxns();
+    if (kind === 'visits') loadVisits();
+    if (kind === 'logins') loadLogins();
+  }
+
+  document.querySelectorAll('.txn-filter-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.txn-filter-btn').forEach(x => x.style.background = '');
+      b.style.background = 'var(--green-light)';
+      state.txns.status = b.dataset.txnFilter;
+      state.txns.page = 1;
+      loadTxns();
+    });
+  });
+  document.querySelectorAll('.login-filter-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.login-filter-btn').forEach(x => x.style.background = '');
+      b.style.background = 'var(--green-light)';
+      state.logins.success = b.dataset.loginFilter;
+      state.logins.page = 1;
+      loadLogins();
+    });
+  });
+
+  let searchTimer;
+  $('userSearch').addEventListener('input', (e) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      state.users.q = e.target.value;
+      state.users.page = 1;
+      loadUsers();
+    }, 300);
+  });
+
+  $('refreshBtn').addEventListener('click', () => {
+    loadStats(); loadUsers(); loadSubs(); loadTxns(); loadPending();
+    loadWithdrawals(); loadVisits(); loadLogins(); loadPrices();
+    loadMaintenance(); loadStkConfig(); loadStkRetries(); loadBatches();
+  });
+
+  // Auto refresh stats + STK retries
+  setInterval(() => { if (token) loadStats(); }, 30000);
+  setInterval(() => {
+    if (token && $('pane-stk').classList.contains('active')) loadStkRetries();
+  }, 20000);
+
+  if (token) {
+    api('/api/admin/stats').then(() => enterApp()).catch(() => logout());
+  }
 })();
 </script>
 </body>
