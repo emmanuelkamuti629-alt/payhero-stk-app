@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin • PayHero Auto STK</title>
+<style>
+  :root {
+    --mpesa-green: #00A651;
+    --mpesa-green-dark: #007A3D;
+    --mpesa-green-light: #E6F7EE;
+    --cream: #FDF6E3;
+    --cream-dark: #F5EEDC;
+    --card: #FFFFFF;
+    --text: #1F2937;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --danger: #DC2626;
+    --danger-light: #FEE2E2;
+    --warning: #D97706;
+    --warning-light: #FEF3C7;
+    --info: #2563EB;
+    --info-light: #DBEAFE;
+    --success: #059669;
+    --success-light: #D1FAE5;
+    --shadow: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--cream); color: var(--text); min-height: 100vh;
+    padding-bottom: 40px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- HEADER ---------- */
+  header {
+    background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+    color: #fff; padding: 22px 20px 56px; position: relative; overflow: hidden;
+  }
+  header::before {
+    content: ""; position: absolute; top: -80px; right: -80px;
+    width: 220px; height: 220px; background: rgba(0,166,81,0.18); border-radius: 50%;
+  }
+  .header-inner {
+    max-width: 1040px; margin: 0 auto; position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-logo {
+    width: 46px; height: 46px; border-radius: 12px; background: var(--mpesa-green);
+    display: grid; place-items: center; font-weight: 800; font-size: 18px; color: #fff;
+    box-shadow: 0 4px 12px rgba(0,166,81,0.4);
+  }
+  .brand-text h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px; }
+  .brand-text p { font-size: 0.76rem; opacity: 0.7; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+    padding: 7px 13px; border-radius: 999px; font-size: 0.75rem; font-weight: 600;
+  }
+  .dot-live { width: 8px; height: 8px; background: #6B7280; border-radius: 50%; transition: background .2s; }
+  .dot-live.on { background: #4ADE80; animation: pulse 1.8s infinite; }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.6); }
+    70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+  }
+  .btn-ghost {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem;
+    font-weight: 600; cursor: pointer; font-family: inherit; transition: background .15s;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.2); }
+
+  /* ---------- LAYOUT ---------- */
+  .container { max-width: 1040px; margin: -34px auto 0; padding: 0 16px; position: relative; z-index: 2; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  @media (min-width: 820px) { .grid-split { grid-template-columns: 1fr 1fr; } }
+
+  .card {
+    background: var(--card); border-radius: 16px; box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(0,0,0,0.04); overflow: hidden;
+  }
+  .card-header { padding: 18px 20px 6px; display: flex; align-items: center; gap: 12px; }
+  .card-icon {
+    width: 38px; height: 38px; border-radius: 10px; background: var(--mpesa-green-light);
+    display: grid; place-items: center; color: var(--mpesa-green-dark); flex-shrink: 0;
+  }
+  .card-icon svg { width: 19px; height: 19px; }
+  .card-title { font-size: 0.98rem; font-weight: 700; letter-spacing: -0.2px; }
+  .card-subtitle { font-size: 0.76rem; color: var(--text-muted); margin-top: 1px; }
+  .card-body { padding: 6px 20px 20px; }
+
+  /* ---------- MASTER SWITCH CARD ---------- */
+  .master {
+    padding: 20px; display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    background: linear-gradient(135deg, #fff 0%, #F8FFFb 100%);
+  }
+  .master-left { display: flex; align-items: center; gap: 14px; }
+  .master-icon {
+    width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center;
+    background: var(--cream-dark); color: var(--text-muted); transition: all .25s; flex-shrink: 0;
+  }
+  .master-icon.on { background: var(--mpesa-green-light); color: var(--mpesa-green-dark); }
+  .master-icon svg { width: 24px; height: 24px; }
+  .master-title { font-size: 1.02rem; font-weight: 700; }
+  .master-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* ---------- TOGGLE SWITCH ---------- */
+  .switch { position: relative; display: inline-block; width: 58px; height: 32px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; inset: 0; background: #CBD5E1;
+    transition: .25s; border-radius: 999px;
+  }
+  .slider:before {
+    position: absolute; content: ""; height: 24px; width: 24px; left: 4px; bottom: 4px;
+    background: #fff; transition: .25s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  .switch input:checked + .slider { background: var(--mpesa-green); }
+  .switch input:checked + .slider:before { transform: translateX(26px); }
+  .switch.small { width: 44px; height: 24px; }
+  .switch.small .slider:before { height: 18px; width: 18px; left: 3px; bottom: 3px; }
+  .switch.small input:checked + .slider:before { transform: translateX(20px); }
+
+  /* ---------- STATUS BAR ---------- */
+  .statusbar {
+    margin-top: 14px; background: #fff; border-radius: 12px; padding: 12px 16px;
+    box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.04);
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 0.82rem;
+  }
+  .sb-dot { width: 9px; height: 9px; border-radius: 50%; background: #9CA3AF; flex-shrink: 0; }
+  .sb-dot.on { background: var(--mpesa-green); animation: pulse 1.8s infinite; }
+  .sb-dot.err { background: var(--danger); }
+  .sb-main { font-weight: 700; }
+  .sb-meta { color: var(--text-muted); font-size: 0.78rem; }
+  .sb-sep { width: 1px; height: 16px; background: var(--border); }
+
+  /* ---------- FORM FIELDS ---------- */
+  .field { margin-top: 14px; }
+  .field label {
+    display: block; font-size: 0.72rem; font-weight: 700; color: var(--text-muted);
+    margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 5px; }
+  .input-wrap { position: relative; display: flex; align-items: center; }
+  .input-prefix {
+    position: absolute; left: 13px; font-size: 0.86rem; font-weight: 600;
+    color: var(--text-muted); pointer-events: none;
+  }
+  .input-wrap input.has-prefix { padding-left: 50px; }
+  input[type="text"], input[type="number"], input[type="tel"], input[type="password"] {
+    width: 100%; padding: 12px 13px; border-radius: 10px; border: 1.5px solid var(--border);
+    background: var(--cream); color: var(--text); font-size: 0.92rem; font-weight: 500;
+    outline: none; transition: all 0.15s ease; font-family: inherit;
+  }
+  input:focus {
+    border-color: var(--mpesa-green); background: #fff;
+    box-shadow: 0 0 0 3px rgba(0,166,81,0.12);
+  }
+  input::placeholder { color: #B0B7C3; font-weight: 400; }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .check-row {
+    display: flex; align-items: center; gap: 10px; margin-top: 16px;
+    padding: 12px 14px; border-radius: 10px; background: var(--cream); border: 1.5px solid var(--border);
+  }
+  .check-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--mpesa-green); cursor: pointer; }
+  .check-row label { font-size: 0.84rem; font-weight: 600; cursor: pointer; }
+  .check-row .sub { font-size: 0.72rem; color: var(--text-muted); font-weight: 400; display: block; margin-top: 1px; }
+
+  /* ---------- BUTTONS ---------- */
+  .btn {
+    padding: 13px; border: none; border-radius: 10px; font-size: 0.92rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s ease; font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-top: 18px; letter-spacing: 0.2px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--mpesa-green) 0%, var(--mpesa-green-dark) 100%);
+    color: #fff; box-shadow: 0 4px 14px rgba(0,166,81,0.3);
+  }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,166,81,0.42); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .btn-sm {
+    padding: 7px 12px; border-radius: 8px; font-size: 0.74rem; font-weight: 700;
+    border: 1.5px solid var(--border); background: #fff; color: var(--text);
+    cursor: pointer; font-family: inherit; transition: all .15s; white-space: nowrap;
+  }
+  .btn-sm:hover { border-color: var(--mpesa-green); color: var(--mpesa-green-dark); background: var(--mpesa-green-light); }
+  .btn-sm.danger:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-light); }
+  .btn-sm:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ---------- SECTION HEADERS ---------- */
+  .sec-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 28px 0 12px; padding: 0 4px; gap: 12px; flex-wrap: wrap;
+  }
+  .sec-header h2 { font-size: 0.94rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .sec-header .count {
+    background: var(--mpesa-green-light); color: var(--mpesa-green-dark);
+    font-size: 0.7rem; padding: 3px 9px; border-radius: 999px; font-weight: 700;
+  }
+  .btn-refresh {
+    background: #fff; border: 1.5px solid var(--border); color: var(--text);
+    padding: 7px 14px; border-radius: 8px; font-size: 0.77rem; font-weight: 600;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.15s ease; font-family: inherit;
+  }
+  .btn-refresh:hover { background: var(--cream); border-color: var(--mpesa-green); color: var(--mpesa-green-dark); }
+  .btn-refresh svg { width: 14px; height: 14px; }
+  .btn-refresh.spinning svg { animation: spin .6s linear; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- LISTS ---------- */
+  .list {
+    background: var(--card); border-radius: 14px; box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,0.04); overflow: hidden;
+  }
+  .list-item {
+    padding: 13px 16px; display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border); transition: background .15s;
+  }
+  .list-item:last-child { border-bottom: none; }
+  .list-item:hover { background: #FAFAFA; }
+  .list-item.inactive { background: #FAFAFA; opacity: 0.72; }
+
+  .avatar {
+    width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
+    font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
+  }
+  .avatar.num { background: var(--info-light); color: var(--info); }
+  .avatar.num.off { background: #F3F4F6; color: #9CA3AF; }
+  .avatar.stk { background: var(--info-light); color: var(--info); }
+  .avatar.callback { background: var(--warning-light); color: var(--warning); }
+
+  .item-main { flex: 1; min-width: 0; }
+  .item-line1 { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; flex-wrap: wrap; }
+  .item-phone { font-size: 0.86rem; font-weight: 700; letter-spacing: 0.2px; font-variant-numeric: tabular-nums; }
+  .item-line2 {
+    font-size: 0.74rem; color: var(--text-muted); display: flex; gap: 10px;
+    flex-wrap: wrap; align-items: center;
+  }
+  .item-line2 .ref { font-family: ui-monospace, Menlo, monospace; font-size: 0.7rem; }
+  .item-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.66rem;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .badge.success { background: var(--success-light); color: #065F46; }
+  .badge.failed  { background: var(--danger-light);  color: #991B1B; }
+  .badge.error   { background: var(--danger-light);  color: #991B1B; }
+  .badge.pending { background: var(--warning-light); color: #92400E; }
+  .badge.info    { background: var(--info-light);    color: #1E40AF; }
+  .badge.off     { background: #F3F4F6; color: #6B7280; }
+
+  .amt { font-size: 0.9rem; font-weight: 700; text-align: right; flex-shrink: 0; }
+  .amt::before { content: "KES "; font-size: 0.66rem; color: var(--text-muted); font-weight: 600; }
+
+  .empty { padding: 44px 24px; text-align: center; color: var(--text-muted); }
+  .empty svg { width: 52px; height: 52px; opacity: 0.22; margin-bottom: 12px; }
+  .empty p { font-size: 0.84rem; }
+
+  /* ---------- LOGIN OVERLAY ---------- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(17,24,39,0.92);
+    display: none; place-items: center; z-index: 1000; padding: 20px;
+    backdrop-filter: blur(6px);
+  }
+  .overlay.show { display: grid; }
+  .login-box {
+    background: #fff; border-radius: 18px; padding: 30px 26px; width: 100%;
+    max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: center;
+  }
+  .login-logo {
+    width: 56px; height: 56px; border-radius: 14px; background: var(--mpesa-green);
+    color: #fff; display: grid; place-items: center; margin: 0 auto 16px;
+    font-weight: 800; font-size: 20px; box-shadow: 0 6px 18px rgba(0,166,81,0.35);
+  }
+  .login-box h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+  .login-box p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; }
+  .login-box input { text-align: center; letter-spacing: 2px; }
+  .login-err { color: var(--danger); font-size: 0.78rem; margin-top: 12px; min-height: 18px; font-weight: 600; }
+
+  /* ---------- TOAST ---------- */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(140%);
+    background: var(--text); color: #fff; padding: 12px 20px; border-radius: 10px;
+    font-size: 0.84rem; font-weight: 500; box-shadow: var(--shadow-lg);
+    transition: transform 0.3s cubic-bezier(.2,.9,.3,1.2); z-index: 2000;
+    max-width: 90vw; text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--mpesa-green-dark); }
+  .toast.error { background: #991B1B; }
+
+  footer { text-align: center; padding: 28px 16px 12px; font-size: 0.74rem; color: var(--text-muted); }
+  footer .mpesa { color: var(--mpesa-green-dark); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo">PH</div>
+      <div class="brand-text">
+        <h1>PayHero Admin</h1>
+        <p>Auto STK Push Control Panel</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-pill">
+        <span class="dot-live" id="headerDot"></span>
+        <span id="headerStatus">Idle</span>
+      </div>
+      <button class="btn-ghost" id="lockBtn">🔒 Lock</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ============ MASTER SWITCH ============ -->
+  <div class="card master">
+    <div class="master-left">
+      <div class="master-icon" id="masterIcon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="master-title">Auto STK Push</div>
+        <div class="master-sub" id="masterSub">Disabled — no automatic pushes will be sent</div>
+      </div>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="autoToggle" />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <!-- ============ STATUS BAR ============ -->
+  <div class="statusbar">
+    <span class="sb-dot" id="sbDot"></span>
+    <span class="sb-main" id="sbMain">Idle</span>
+    <span class="sb-sep"></span>
+    <span class="sb-meta" id="sbNext">—</span>
+    <span class="sb-sep"></span>
+    <span class="sb-meta" id="sbRounds">Rounds: 0</span>
+    <span class="sb-sep"></span>
+    <span class="sb-meta" id="sbActive">Active numbers: 0</span>
+  </div>
+
+  <div class="grid grid-split" style="margin-top:16px;">
+
+    <!-- ============ SETTINGS ============ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">Sending Schedule</div>
+          <div class="card-subtitle">Control timing and default values</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row2">
+          <div class="field">
+            <label for="intervalSeconds">Gap between numbers</label>
+            <input id="intervalSeconds" type="number" min="2" placeholder="30" />
+            <div class="hint">Seconds</div>
+          </div>
+          <div class="field">
+            <label for="cycleDelaySeconds">Gap before repeat</label>
+            <input id="cycleDelaySeconds" type="number" min="5" placeholder="60" />
+            <div class="hint">Seconds</div>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="defaultAmount">Default amount</label>
+            <input id="defaultAmount" type="number" min="1" placeholder="1" />
+            <div class="hint">Used when a number has no amount</div>
+          </div>
+          <div class="field">
+            <label for="defaultReference">Default reference</label>
+            <input id="defaultReference" type="text" placeholder="AUTO-STK" />
+            <div class="hint">Optional tag</div>
+          </div>
+        </div>
+
+        <div class="check-row">
+          <input type="checkbox" id="repeat" />
+          <label for="repeat">
+            Repeat continuously
+            <span class="sub">If off, one full round is sent then auto-push stops</span>
+          </label>
+        </div>
+
+        <button class="btn btn-primary" id="saveSettingsBtn">
+          <span class="btn-label">Save Settings</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ============ ADD NUMBER ============ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">Add Saved Number</div>
+          <div class="card-subtitle">Numbers receive STK pushes automatically</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label for="newPhone">Phone Number</label>
+          <div class="input-wrap">
+            <span class="input-prefix">+254</span>
+            <input id="newPhone" class="has-prefix" type="tel" inputmode="numeric"
+                   placeholder="712345678" maxlength="10" />
+          </div>
+          <div class="hint">Enter 9 digits (e.g. 712345678) or full 254…</div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="newAmount">Amount (KES)</label>
+            <input id="newAmount" type="number" min="1" placeholder="1" />
+          </div>
+          <div class="field">
+            <label for="newReference">Reference</label>
+            <input id="newReference" type="text" placeholder="optional" />
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="addNumberBtn">
+          <span class="btn-label">➕ Save Number</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SAVED NUMBERS ============ -->
+  <div class="sec-header">
+    <h2>Saved Numbers <span class="count" id="numCount">0</span></h2>
+    <div style="display:flex; gap:8px;">
+      <button class="btn-refresh" id="bulkOnBtn">Activate all</button>
+      <button class="btn-refresh" id="bulkOffBtn">Deactivate all</button>
+    </div>
+  </div>
+  <div class="list" id="numbersList">
+    <div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="5" y="2" width="14" height="20" rx="2"/>
+        <line x1="12" y1="18" x2="12" y2="18"/>
+      </svg>
+      <p>No saved numbers yet. Add one above.</p>
+    </div>
+  </div>
+
+  <!-- ============ TRANSACTIONS ============ -->
+  <div class="sec-header">
+    <h2>Recent Transactions <span class="count" id="txCount">0</span></h2>
+    <button class="btn-refresh" id="refreshBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/>
+        <polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+  <div class="list" id="txList">
+    <div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="9" y1="15" x2="15" y2="15"/>
+      </svg>
+      <p>No transactions yet.</p>
+    </div>
+  </div>
+
+  <footer>
+    PayHero Admin &middot; <span class="mpesa">M-Pesa</span> STK Automation
+  </footer>
+</div>
+
+<!-- ============ LOGIN OVERLAY ============ -->
+<div class="overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">PH</div>
+    <h2>Admin Access</h2>
+    <p>Enter your admin password to continue</p>
+    <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" />
+    <button class="btn btn-primary" id="loginBtn">Unlock</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+
+  /* ---------------- STATE ---------------- */
+  let adminKey = localStorage.getItem('ph_admin_key') || '';
+  let numbers = [];
+  let settings = {};
+  let scheduler = {};
+  let countdownTimer = null;
+
+  /* ---------------- TOAST ---------------- */
+  const toastEl = $('toast');
+  let toastTimer;
+  function toast(msg, type = '') {
+    toastEl.textContent = msg;
+    toastEl.className = 'toast show ' + type;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toastEl.className = 'toast ' + type; }, 3200);
+  }
+
+  /* ---------------- API HELPER ---------------- */
+  async function api(url, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (adminKey) headers['x-admin-key'] = adminKey;
+
+    const res = await fetch(url, { ...options, headers });
+    let json = {};
+    try { json = await res.json(); } catch (_) {}
+
+    if (res.status === 401) {
+      showLogin('Session expired. Please re-enter password.');
+      throw new Error('Unauthorized');
+    }
+    if (!res.ok) throw new Error(json.message || ('HTTP ' + res.status));
+    return json;
+  }
+
+  /* ---------------- LOGIN ---------------- */
+  function showLogin(msg) {
+    $('loginOverlay').classList.add('show');
+    $('loginErr').textContent = msg || '';
+    setTimeout(() => $('passwordInput').focus(), 100);
+  }
+  function hideLogin() {
+    $('loginOverlay').classList.remove('show');
+    $('passwordInput').value = '';
+    $('loginErr').textContent = '';
+  }
+
+  $('loginBtn').addEventListener('click', doLogin);
+  $('passwordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+
+  async function doLogin() {
+    const pass = $('passwordInput').value.trim();
+    if (!pass) { $('loginErr').textContent = 'Enter a password'; return; }
+    adminKey = pass;
+    localStorage.setItem('ph_admin_key', pass);
+    try {
+      await api('/api/admin/status');
+      hideLogin();
+      toast('Welcome, admin', 'success');
+      loadAll();
+    } catch (err) {
+      localStorage.removeItem('ph_admin_key');
+      adminKey = '';
+      $('loginErr').textContent = 'Incorrect password';
+    }
+  }
+
+  $('lockBtn').addEventListener('click', () => {
+    localStorage.removeItem('ph_admin_key');
+    adminKey = '';
+    numbers = []; settings = {}; scheduler = {};
+    showLogin('Locked');
+  });
+
+  /* ---------------- FORMATTERS ---------------- */
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+  function fmtPhone(p) {
+    const s = String(p || '');
+    if (s.length === 12 && s.startsWith('254')) return '+254 ' + s.slice(3, 6) + ' ' + s.slice(6);
+    return s || '—';
+  }
+  function fmtTime(iso) {
+    if (!iso) return '—';
+    try { return new Date(iso).toLocaleString(); } catch (_) { return '—'; }
+  }
+  function statusBadge(status) {
+    const s = String(status || '').toLowerCase().trim();
+    let cls = 'info';
+    if (['success', 'completed'].includes(s)) cls = 'success';
+    else if (['failed', 'error', 'cancelled', 'rejected'].includes(s)) cls = 'failed';
+    else if (['pending', 'processing', 'queued', 'sent', 'accepted'].includes(s)) cls = 'pending';
+    return `<span class="badge ${cls}">${escapeHtml(status || 'unknown')}</span>`;
+  }
+
+  /* ---------------- RENDER: SETTINGS ---------------- */
+  function renderSettings() {
+    $('intervalSeconds').value = settings.intervalSeconds ?? 30;
+    $('cycleDelaySeconds').value = settings.cycleDelaySeconds ?? 60;
+    $('defaultAmount').value = settings.defaultAmount ?? 1;
+    $('defaultReference').value = settings.defaultReference ?? 'AUTO-STK';
+    $('repeat').checked = !!settings.repeat;
+
+    const on = !!settings.autoEnabled;
+    $('autoToggle').checked = on;
+    $('masterIcon').classList.toggle('on', on);
+    $('masterSub').textContent = on
+      ? 'Enabled — pushing to active numbers automatically'
+      : 'Disabled — no automatic pushes will be sent';
+  }
+
+  /* ---------------- RENDER: STATUS ---------------- */
+  function renderStatus() {
+    const running = !!scheduler.running && !!settings.autoEnabled;
+    const activeCount = numbers.filter(n => n.active).length;
+
+    $('headerDot').classList.toggle('on', running);
+    $('headerStatus').textContent = running ? 'Running' : 'Idle';
+
+    const dot = $('sbDot');
+    dot.className = 'sb-dot' + (running ? ' on' : '');
+
+    $('sbMain').textContent = running ? 'Auto-push running' : 'Auto-push idle';
+    $('sbRounds').textContent = 'Rounds: ' + (scheduler.roundCount || 0);
+    $('sbActive').textContent = 'Active numbers: ' + activeCount + ' / ' + numbers.length;
+
+    startCountdown();
+  }
+
+  function startCountdown() {
+    clearInterval(countdownTimer);
+    const tick = () => {
+      const el = $('sbNext');
+      if (!settings.autoEnabled) { el.textContent = 'Next: —'; return; }
+      if (!scheduler.nextRunAt) { el.textContent = 'Next: queued…'; return; }
+      const diff = Math.round((new Date(scheduler.nextRunAt).getTime() - Date.now()) / 1000);
+      if (diff <= 0) { el.textContent = 'Next: sending…'; return; }
+      el.textContent = 'Next push in ' + diff + 's';
+    };
+    tick();
+    countdownTimer = setInterval(tick, 1000);
+  }
+
+  /* ---------------- RENDER: NUMBERS ---------------- */
+  function renderNumbers() {
+    $('numCount').textContent = numbers.length;
+    const list = $('numbersList');
+
+    if (!numbers.length) {
+      list.innerHTML = `
+        <div class="empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="5" y="2" width="14" height="20" rx="2"/>
+            <line x1="12" y1="18" x2="12" y2="18"/>
+          </svg>
+          <p>No saved numbers yet. Add one above.</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = numbers.map(n => {
+      const active = !!n.active;
+      const meta = [];
+      if (n.amount) meta.push('KES ' + n.amount);
+      if (n.reference) meta.push('ref: ' + n.reference);
+      meta.push('sent ' + (n.sendCount || 0) + '×');
+      if (n.lastSentAt) meta.push('last: ' + fmtTime(n.lastSentAt));
+
+      const lastBadge = n.lastStatus
+        ? statusBadge(n.lastStatus)
+        : '<span class="badge off">never sent</span>';
+
+      const reason = (!active && n.lastReason)
+        ? `<div class="item-line2" style="color:#DC2626; margin-top:4px;">⚠ ${escapeHtml(n.lastReason)}</div>`
+        : '';
+
+      return `
+        <div class="list-item ${active ? '' : 'inactive'}">
+          <div class="avatar num ${active ? '' : 'off'}">${active ? '📲' : '⏸'}</div>
+          <div class="item-main">
+            <div class="item-line1">
+              <span class="item-phone">${escapeHtml(fmtPhone(n.phone))}</span>
+              ${active ? '<span class="badge success">active</span>' : '<span class="badge off">inactive</span>'}
+              ${lastBadge}
+            </div>
+            <div class="item-line2">${escapeHtml(meta.join(' · '))}</div>
+            ${reason}
+          </div>
+          <div class="item-actions">
+            <label class="switch small" title="${active ? 'Deactivate' : 'Activate'}">
+              <input type="checkbox" data-act="toggle" data-id="${n.id}" ${active ? 'checked' : ''} />
+              <span class="slider"></span>
+            </label>
+            <button class="btn-sm" data-act="send" data-id="${n.id}" title="Send now">Send</button>
+            <button class="btn-sm" data-act="edit" data-id="${n.id}">Edit</button>
+            <button class="btn-sm danger" data-act="del" data-id="${n.id}">✕</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  /* ---------------- RENDER: TRANSACTIONS ---------------- */
+  function renderTransactions(txs) {
+    $('txCount').textContent = txs.length;
+    const list = $('txList');
+
+    if (!txs.length) {
+      list.innerHTML = `
+        <div class="empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+          <p>No transactions yet.</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = txs.map(tx => {
+      const isAuto = tx.source === 'auto';
+      const avatarCls = tx.type === 'CALLBACK' ? 'callback' : 'stk';
+      const label = tx.type === 'CALLBACK' ? 'CBK' : 'STK';
+      const reason = tx.reason
+        ? `<div class="item-line2" style="margin-top:4px;"><span style="color:#DC2626;font-weight:600;">⚠ ${escapeHtml(tx.reason)}</span></div>`
+        : '';
+
+      return `
+        <div class="list-item">
+          <div class="avatar ${avatarCls}">${label}</div>
+          <div class="item-main">
+            <div class="item-line1">
+              ${statusBadge(tx.status)}
+              ${isAuto ? '<span class="badge info">auto</span>' : '<span class="badge off">manual</span>'}
+            </div>
+            <div class="item-line2">
+              <span>${escapeHtml(fmtPhone(tx.phone))}</span>
+              ${tx.reference ? `<span class="ref">${escapeHtml(tx.reference)}</span>` : ''}
+              <span>${escapeHtml(fmtTime(tx.createdAt))}</span>
+            </div>
+            ${reason}
+          </div>
+          <div class="amt">${escapeHtml(String(tx.amount ?? '—'))}</div>
+        </div>`;
+    }).join('');
+  }
+
+  /* ---------------- DATA LOADING ---------------- */
+  async function loadStatus() {
+    const res = await api('/api/admin/status');
+    settings = res.data.settings || {};
+    scheduler = res.data.scheduler || {};
+    if (Array.isArray(res.data.numbers)) numbers = res.data.numbers;
+    renderSettings();
+    renderStatus();
+  }
+
+  async function loadNumbers() {
+    const res = await api('/api/admin/numbers');
+    numbers = res.data || [];
+    renderNumbers();
+    renderStatus();
+  }
+
+  async function loadTransactions() {
+    const res = await api('/api/transactions');
+    renderTransactions(res.data || []);
+  }
+
+  async function loadAll() {
+    try {
+      await Promise.all([loadStatus(), loadNumbers(), loadTransactions()]);
+    } catch (err) {
+      if (err.message !== 'Unauthorized') toast(err.message, 'error');
+    }
+  }
+
+  /* ---------------- ACTIONS ---------------- */
+  $('autoToggle').addEventListener('change', async (e) => {
+    const enabled = e.target.checked;
+    e.target.disabled = true;
+    try {
+      const res = await api('/api/admin/settings', {
+        method: 'PUT',
+        body: JSON.stringify({ autoEnabled: enabled }),
+      });
+      settings = res.data.settings;
+      scheduler = res.data.scheduler;
+      renderSettings();
+      renderStatus();
+      toast(enabled ? '🚀 Auto STK push ENABLED' : '⏹ Auto STK push DISABLED', enabled ? 'success' : '');
+    } catch (err) {
+      toast(err.message, 'error');
+      e.target.checked = !enabled;
+    } finally {
+      e.target.disabled = false;
+    }
+  });
+
+  $('saveSettingsBtn').addEventListener('click', async () => {
+    const btn = $('saveSettingsBtn');
+    btn.disabled = true;
+    try {
+      const res = await api('/api/admin/settings', {
+        method: 'PUT',
+        body: JSON.stringify({
+          intervalSeconds: Number($('intervalSeconds').value),
+          cycleDelaySeconds: Number($('cycleDelaySeconds').value),
+          defaultAmount: Number($('defaultAmount').value),
+          defaultReference: $('defaultReference').value.trim(),
+          repeat: $('repeat').checked,
+        }),
+      });
+      settings = res.data.settings;
+      scheduler = res.data.scheduler;
+      renderSettings();
+      renderStatus();
+      toast('Settings saved', 'success');
+    } catch (err) {
+      toast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('newPhone').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 12);
+    if (e.target.value.startsWith('0')) e.target.value = e.target.value.slice(1);
+  });
+
+  $('addNumberBtn').addEventListener('click', async () => {
+    const phone = $('newPhone').value.trim();
+    const amount = $('newAmount').value.trim();
+    const reference = $('newReference').value.trim();
+
+    if (phone.length < 9) { toast('Enter a valid phone number', 'error'); return; }
+
+    const btn = $('addNumberBtn');
+    btn.disabled = true;
+    try {
+      await api('/api/admin/numbers', {
+        method: 'POST',
+        body: JSON.stringify({
+          phone,
+          amount: amount ? Number(amount) : undefined,
+          reference: reference || undefined,
+        }),
+      });
+      $('newPhone').value = '';
+      $('newAmount').value = '';
+      $('newReference').value = '';
+      toast('Number saved', 'success');
+      await loadNumbers();
+    } catch (err) {
+      toast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('numbersList').addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const act = btn.dataset.act;
+    const num = numbers.find(n => n.id === id);
+    if (!num) return;
+
+    try {
+      if (act === 'send') {
+        btn.disabled = true;
+        btn.textContent = '…';
+        const res = await api(`/api/admin/numbers/${id}/send`, { method: 'POST' });
+        toast(res.status ? '✅ STK push sent' : '❌ Push failed', res.status ? 'success' : 'error');
+        await Promise.all([loadNumbers(), loadTransactions()]);
+      } else if (act === 'edit') {
+        const newAmount = prompt('Amount (KES):', num.amount || settings.defaultAmount || 1);
+        if (newAmount === null) return;
+        const newRef = prompt('Reference (optional):', num.reference || '');
+        if (newRef === null) return;
+        await api(`/api/admin/numbers/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ amount: Number(newAmount), reference: newRef.trim() }),
+        });
+        toast('Number updated', 'success');
+        await loadNumbers();
+      } else if (act === 'del') {
+        if (!confirm('Delete ' + fmtPhone(num.phone) + '?')) return;
+        await api(`/api/admin/numbers/${id}`, { method: 'DELETE' });
+        toast('Number deleted', 'success');
+        await loadNumbers();
+      }
+    } catch (err) {
+      toast(err.message, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Send';
+    }
+  });
+
+  // Toggle active / inactive (checkbox inside the switch)
+  $('numbersList').addEventListener('change', async (e) => {
+    const cb = e.target.closest('input[data-act="toggle"]');
+    if (!cb) return;
+    const id = cb.dataset.id;
+    cb.disabled = true;
+    try {
+      await api(`/api/admin/numbers/${id}/toggle`, { method: 'PATCH' });
+      const num = numbers.find(n => n.id === id);
+      toast(num && num.active ? 'Deactivated — no STK will be sent' : 'Activated — STK will be sent',
+            num && num.active ? '' : 'success');
+      await loadNumbers();
+    } catch (err) {
+      toast(err.message, 'error');
+      cb.checked = !cb.checked;
+    } finally {
+      cb.disabled = false;
+    }
+  });
+
+  $('bulkOnBtn').addEventListener('click', async () => {
+    if (!confirm('Activate ALL saved numbers?')) return;
+    try {
+      await api('/api/admin/numbers/bulk', {
+        method: 'PATCH',
+        body: JSON.stringify({ active: true }),
+      });
+      toast('All numbers activated', 'success');
+      await loadNumbers();
+    } catch (err) { toast(err.message, 'error'); }
+  });
+
+  $('bulkOffBtn').addEventListener('click', async () => {
+    if (!confirm('Deactivate ALL saved numbers? No STK will be sent.')) return;
+    try {
+      await api('/api/admin/numbers/bulk', {
+        method: 'PATCH',
+        body: JSON.stringify({ active: false }),
+      });
+      toast('All numbers deactivated');
+      await loadNumbers();
+    } catch (err) { toast(err.message, 'error'); }
+  });
+
+  $('refreshBtn').addEventListener('click', async () => {
+    const b = $('refreshBtn');
+    b.classList.add('spinning');
+    try { await loadAll(); } finally { setTimeout(() => b.classList.remove('spinning'), 400); }
+  });
+
+  /* ---------------- BOOT ---------------- */
+  async function boot() {
+    try {
+      await api('/api/admin/status');
+      hideLogin();
+      await loadAll();
+    } catch (err) {
+      if (err.message === 'Unauthorized') showLogin();
+      else { hideLogin(); toast(err.message, 'error'); }
+    }
+  }
+
+  // Poll every 4 seconds to keep scheduler status live
+  setInterval(() => {
+    if (!adminKey) return;
+    api('/api/admin/status').then(res => {
+      settings = res.data.settings || {};
+      scheduler = res.data.scheduler || {};
+      if (Array.isArray(res.data.numbers)) numbers = res.data.numbers;
+      renderSettings();
+      renderNumbers();
+      renderStatus();
+    }).catch(() => {});
+  }, 4000);
+
+  setInterval(() => {
+    if (!adminKey) return;
+    loadTransactions().catch(() => {});
+  }, 7000);
+
+  boot();
+})();
+</script>
+</body>
+  </html>
