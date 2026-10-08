@@ -1,4 +1,4 @@
-// server.js - PayHero STK + Admin Auto-Push Scheduler
+// server.js - PayHero STK + Admin Auto-Push Scheduler (with enhanced error logging)
 require('dotenv').config();
 
 const express = require('express');
@@ -145,7 +145,7 @@ async function payheroPost(payload) {
 }
 
 // =========================================================
-// CORE STK SENDER (used by public route, admin "send now", and auto scheduler)
+// CORE STK SENDER
 // =========================================================
 async function sendStk({ phone, amount, reference, source = 'manual', numberId = null }) {
   const msisdn = normalizePhone(phone);
@@ -167,6 +167,10 @@ async function sendStk({ phone, amount, reference, source = 'manual', numberId =
     const r = await payheroPost(payload);
     httpStatus = r.httpStatus;
     data = r.data;
+    
+    // 🔍 DEBUG: Log the exact PayHero response to your server console
+    console.log('📥 PayHero API Raw Response:', JSON.stringify(data, null, 2));
+    
   } catch (err) {
     const reason = err.message;
     recordTransaction({
@@ -188,7 +192,14 @@ async function sendStk({ phone, amount, reference, source = 'manual', numberId =
     httpStatus < 300 &&
     (data?.success === true || data?.status === true);
 
-  const reason = ok ? null : data?.message || data?.error || 'Request failed';
+  // 🔍 IMPROVED ERROR PARSING: Look for 'detail', then fallback to stringifying the whole object
+  const reason = ok ? null : (
+    data?.message || 
+    data?.error || 
+    data?.detail || 
+    (typeof data === 'string' ? data : JSON.stringify(data)) || 
+    'Request failed'
+  );
 
   recordTransaction({
     type: 'STK',
@@ -197,7 +208,7 @@ async function sendStk({ phone, amount, reference, source = 'manual', numberId =
     status: ok ? 'pending' : 'failed',
     reason,
     reference: externalRef,
-    checkout_request_id: data?.CheckoutRequestID || null,
+    checkout_request_id: data?.CheckoutRequestID || data?.checkout_request_id || null,
     source,
     numberId,
     raw: data,
