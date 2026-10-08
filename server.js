@@ -1,4 +1,4 @@
-// server.js - PayHero STK + Admin Auto-Push (MongoDB version)
+// server.js - PayHero STK + Admin Auto-Push (MongoDB version, crash-proof)
 require('dotenv').config();
 
 const express = require('express');
@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 const PAYHERO_BASIC_AUTH_TOKEN = process.env.PAYHERO_BASIC_AUTH_TOKEN?.trim();
 const PAYHERO_CHANNEL_ID = parseInt(process.env.PAYHERO_CHANNEL_ID, 10);
 const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || 'admin123').trim();
-const RENDER_URL = process.env.RENDER_URL || 'https://payhero-stk-app.onrender.com';
+const RENDER_URL = (process.env.RENDER_URL || 'https://payhero-stk-app.onrender.com').replace(/\/+$/, '');
 const MONGODB_URI = process.env.MONGODB_URI;
 
 const PAYHERO_BASE_URL = 'https://backend.payhero.co.ke/api/v2';
@@ -53,6 +53,10 @@ console.log('=============================================');
 // =========================================================
 // MONGOOSE MODELS
 // =========================================================
+
+// ---- Settings ----
+// NOTE: We deliberately use collection name "app_settings" (not "settings")
+// so any old broken indexes on the legacy "settings" collection are ignored.
 const SettingsSchema = new mongoose.Schema({
   _id: { type: String, default: 'global' },
   autoEnabled: { type: Boolean, default: false },
@@ -63,8 +67,9 @@ const SettingsSchema = new mongoose.Schema({
   repeat: { type: Boolean, default: true },
 }, { timestamps: true, _id: false });
 
-const Settings = mongoose.model('Settings', SettingsSchema);
+const Settings = mongoose.model('Settings', SettingsSchema, 'app_settings');
 
+// ---- Saved Numbers ----
 const SavedNumberSchema = new mongoose.Schema({
   phone: { type: String, required: true, unique: true, index: true },
   amount: { type: Number, default: null },
@@ -85,7 +90,7 @@ SavedNumberSchema.set('toJSON', {
 const SavedNumber = mongoose.model('SavedNumber', SavedNumberSchema);
 
 // =========================================================
-// IN-MEMORY CACHE (for fast access by scheduler)
+// IN-MEMORY CACHE
 // =========================================================
 let settings = {
   autoEnabled: false,
@@ -97,11 +102,40 @@ let settings = {
 };
 
 let numbers = [];
-const transactions = []; // transaction log stays in-memory
+const transactions = [];
+
+// =========================================================
+// AUTO-CLEAN stale indexes on the "app_settings" collection
+// =========================================================
+async function cleanStaleIndexes() {
+  try {
+    const collection = Settings.collection;
+    const indexes = await collection.indexes();
+    for (const idx of indexes) {
+      const name = idx.name;
+      if (name && name !== '_id_') {
+        try {
+          await collection.dropIndex(name);
+          console.log(`🧹 Dropped stale index on app_settings: ${name}`);
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
+  } catch (e) {
+    // Collection doesn't exist yet — that's fine
+  }
+}
 
 async function loadSettingsFromDB() {
+  await cleanStaleIndexes();
+
   let doc = await Settings.findById('global');
-  if (!doc) doc = await Settings.create({ _id: 'global' });
+  if (!doc) {
+    doc = new Settings({ _id: 'global' });
+    await doc.save();
+  }
+
   settings = {
     autoEnabled: doc.autoEnabled,
     intervalSeconds: doc.intervalSeconds,
@@ -274,9 +308,7 @@ function stopScheduler() {
 async function runRound(gen) {
   if (gen !== scheduler.generation || !settings.autoEnabled) return;
 
-  // Always refresh from DB before a round
   await loadNumbersFromDB();
-
   const active = numbers.filter((n) => n.active);
 
   if (active.length === 0) {
@@ -303,7 +335,6 @@ async function runRound(gen) {
         source: 'auto', numberId: num.id,
       });
 
-      // Persist per-number stats to MongoDB
       await SavedNumber.findByIdAndUpdate(num.id, {
         $inc: { sendCount: 1 },
         $set: {
@@ -313,7 +344,6 @@ async function runRound(gen) {
         },
       });
 
-      // Update in-memory cache
       const idx = numbers.findIndex((n) => n.id === num.id);
       if (idx >= 0) {
         numbers[idx].sendCount = (numbers[idx].sendCount || 0) + 1;
@@ -467,7 +497,7 @@ app.get('/api/admin/status', requireAdmin, async (_req, res) => {
 });
 
 // =========================================================
-// ADMIN: NUMBERS CRUD (MongoDB)
+// ADMIN: NUMBERS CRUD
 // =========================================================
 app.get('/api/admin/numbers', requireAdmin, async (_req, res) => {
   try {
@@ -588,7 +618,7 @@ app.post('/api/admin/numbers/:id/send', requireAdmin, async (req, res) => {
 });
 
 // =========================================================
-// ADMIN: SETTINGS (MongoDB)
+// ADMIN: SETTINGS
 // =========================================================
 app.put('/api/admin/settings', requireAdmin, async (req, res) => {
   try {
@@ -665,9 +695,14 @@ async function start() {
       }
     });
   } catch (err) {
-    console.error('❌ MongoDB connection failed:', err.message);
+    console.error('❌ Startup failed:', err.message);
     process.exit(1);
   }
 }
+
+// Catch any unexpected errors so the app doesn't crash silently
+process.on('unhandledRejection', (err) => {
+  console.error('⚠ Unhandled rejection:', err?.message || err);
+});
 
 start();
